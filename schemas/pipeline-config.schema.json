@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrototypePipelineConfig",
+  "description": "Configuration for a prototype pipeline run",
+  "type": "object",
+  "required": ["project_name", "working_dir", "source", "output"],
+  "properties": {
+    "project_name": {
+      "type": "string",
+      "description": "Human-readable project name"
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Auto-generated run identifier (run_YYYYMMDD_HHMMSS)"
+    },
+    "working_dir": {
+      "type": "string",
+      "description": "Absolute path to the run working directory. All agent file operations are scoped to this directory."
+    },
+    "source": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["brief", "figma", "seed", "combined"],
+          "description": "Input source type"
+        },
+        "brief_path": {
+          "type": ["string", "null"],
+          "description": "Path to brief file, relative to working_dir (brief.md or brief.txt)"
+        },
+        "figma_file_url": {
+          "type": ["string", "null"],
+          "description": "Figma file URL (https://figma.com/design/...)"
+        },
+        "seed_path": {
+          "type": ["string", "null"],
+          "description": "Absolute path to Ouroboros seed YAML file"
+        },
+        "seed_metadata": {
+          "type": "object",
+          "description": "Metadata extracted from seed file (populated by pipeline-intake-agent)"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": ["framework"],
+      "properties": {
+        "framework": {
+          "type": "string",
+          "enum": ["react", "vue"],
+          "description": "SPA framework for the generated prototype"
+        },
+        "lo_fi_enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, lo-fi-wireframe-builder runs and gates the SPA stage"
+        },
+        "lo_fi_gate": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true and lo_fi_enabled, a human review gate pauses before SPA generation"
+        }
+      }
+    },
+    "design_tokens": {
+      "type": "object",
+      "properties": {
+        "token_file_path": {
+          "type": ["string", "null"],
+          "description": "Path to design token file, relative to working_dir. Supported: CSS custom properties, JSON token file."
+        }
+      }
+    }
+  }
+}

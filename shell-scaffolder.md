@@ -74,7 +74,7 @@ Set `lo_fi.status` to `"not_applicable"` if `lo_fi_enabled: false` in `pipeline.
 5. When `pipeline.prototype.status` is `pending` or `in_progress`, show `<LoadingView />` in the Prototype tab
 6. When `pipeline.prototype.status` is `ready`, show the real prototype router content
 7. Tab order: `▶ Prototype` | `≡ Requirements` | `~ Flow` | `~ Journey` | `⬡ Wireframe` (only if lo_fi present) | `◎ Artifacts`
-8. The Requirements tab renders `manifest.byproducts.requirements` — show "Requirements not ready yet." if null
+8. The Requirements tab renders `manifest.byproducts.requirements` — a summary object (not the full `requirements.json`). Show "Requirements not ready yet." if null. Display: product name, screen count, persona/flow counts, a screen table with priority badges, and any analyst notes.
 
 ## `LoadingView`
 

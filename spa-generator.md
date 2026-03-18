@@ -73,20 +73,13 @@ Apply well-known defaults for the named design system:
 | `chakra` | `@chakra-ui/react` | `ChakraProvider` wrapping `App` |
 | `fiori` | `@ui5/webcomponents-react @ui5/webcomponents @ui5/webcomponents-fiori` | `ThemeProvider` from `@ui5/webcomponents-react` wrapping `App`; import components from `@ui5/webcomponents-react` |
 
-Add the appropriate package to `package.json` dependencies.
-Generate a minimal theme config file appropriate for the system.
+**Do not modify `package.json`** — `shell-scaffolder` already installed all design system deps. Use the packages that are already installed.
+Generate a minimal theme config file appropriate for the system if needed.
 Use the system's components where they map to slot types (e.g. `<Button>` from MUI instead of a plain `<button>`).
 
 #### SAP Fiori (`fiori`) — detailed rules
 
-SAP Fiori is the **default design system** when no design system is specified. Apply it as follows:
-
-**Dependencies** (add all three to `package.json`):
-```json
-"@ui5/webcomponents-react": "^2",
-"@ui5/webcomponents": "^2",
-"@ui5/webcomponents-fiori": "^2"
-```
+SAP Fiori is the **default design system** when no design system is specified. All required packages are installed by `shell-scaffolder` — do not modify `package.json`.
 
 **App entry wiring** — wrap `<RouterProvider>` / `<RouterView>` in `ThemeProvider` inside the prototype frame:
 ```jsx
@@ -305,47 +298,34 @@ Key rules regardless of mode:
 
 ### 7. Update `public/pipeline-manifest.json`
 
-`shell-scaffolder` already wrote `spa/public/pipeline-manifest.json` with all stages at `pending`. When you are done generating all view files and components, read the existing manifest, merge in the following fields, and write the file back. Never overwrite the full file from scratch — other agents will have already updated their stage statuses.
+`shell-scaffolder` wrote the initial manifest. `requirements-analyst`, `flow-diagram-builder`, `journey-diagram-builder`, and `lo-fi-wireframe-builder` have already updated their own sections. You only add what you uniquely own.
 
-Merge these fields into the existing manifest:
+Read the existing manifest, merge in the following fields only, and write it back:
 
 ```json
 {
   "screens": [
     { "screen_id": "string", "screen_name": "string", "route": "string" }
   ],
-  "byproducts": {
-    "flow": {
-      "present": true,
-      "content": "<full text content of flow.excalidraw — the raw JSON string>"
-    },
-    "journey": {
-      "present": true,
-      "content": "<full text content of journey.excalidraw — the raw JSON string>"
-    },
-    "lo_fi": {
-      "present": false,
-      "content": null,
-      "screen_count": 0
-    }
-  },
   "artifacts": [
-    { "name": "Flow Diagram", "file": "flow.excalidraw", "description": "Excalidraw screen navigation flowchart" },
-    { "name": "Flow Viewer", "file": "flow.html", "description": "Standalone browser viewer for flow diagram" },
-    { "name": "User Journey", "file": "journey.excalidraw", "description": "Excalidraw persona journey map" },
-    { "name": "Journey Viewer", "file": "journey.html", "description": "Standalone browser viewer for journey map" },
-    { "name": "Lo-fi Wireframe", "file": "lo-fi.excalidraw", "description": "Excalidraw grey-box wireframes", "present": false },
-    { "name": "Lo-fi Viewer", "file": "lo-fi.html", "description": "Self-contained browser viewer for wireframes", "present": false },
-    { "name": "Screen Map", "file": "screen-map.json", "description": "Canonical screen inventory" },
-    { "name": "Requirements", "file": "requirements.json", "description": "Structured product requirements" },
-    { "name": "Validation Report", "file": "validation-report.json", "description": "Parity check results" }
+    { "name": "Flow Diagram",      "file": "flow.excalidraw",    "description": "Excalidraw screen navigation flowchart",   "present": true },
+    { "name": "Flow Viewer",       "file": "flow.html",          "description": "Standalone browser viewer for flow diagram", "present": true },
+    { "name": "User Journey",      "file": "journey.excalidraw", "description": "Excalidraw persona journey map",             "present": true },
+    { "name": "Journey Viewer",    "file": "journey.html",       "description": "Standalone browser viewer for journey map",  "present": true },
+    { "name": "Lo-fi Wireframe",   "file": "lo-fi.excalidraw",   "description": "Excalidraw grey-box wireframes",             "present": false },
+    { "name": "Lo-fi Viewer",      "file": "lo-fi.html",         "description": "Self-contained browser viewer for wireframes", "present": false },
+    { "name": "Screen Map",        "file": "screen-map.json",    "description": "Canonical screen inventory",                "present": true },
+    { "name": "Requirements",      "file": "requirements.json",  "description": "Structured product requirements",           "present": true },
+    { "name": "Validation Report", "file": "validation-report.json", "description": "Parity check results",                 "present": false }
   ]
 }
 ```
 
-Read `flow.excalidraw` and `journey.excalidraw` from `output_dir` and embed their full text content (raw JSON strings) into `byproducts.flow.content` and `byproducts.journey.content`. If `lo_fi_enabled: true`, read `lo-fi.excalidraw` from `output_dir`, set `lo_fi.present: true`, embed the full JSON string into `lo_fi.content`, and set `lo_fi.screen_count` from `lo-fi-index.json`. All three content values are raw text of `.excalidraw` files — embed as JSON string values so the manifest remains valid JSON.
+Set `lo-fi` artifact `present: true` when `lo_fi_enabled: true`.
 
-Then set `pipeline.prototype.status` to `"ready"` and `pipeline.prototype.updated_at` to the current ISO8601 timestamp in the same write.
+Then in the same write, set `pipeline.prototype.status` to `"ready"` and `pipeline.prototype.updated_at` to the current ISO8601 timestamp.
+
+Do **not** touch `byproducts.flow`, `byproducts.journey`, `byproducts.lo_fi`, or `byproducts.requirements` — those sections are owned by the agents that produced them.
 
 #### Wiring into `App` (React) / `App.vue` (Vue)
 

@@ -88,70 +88,7 @@ Record any hard constraints:
 
 ## Output Format
 
-Write `requirements.json` to `working_dir`:
-
-```json
-{
-  "meta": {
-    "project_name": "string",
-    "version": "1.0.0",
-    "created_at": "ISO8601",
-    "source_mode": "brief | figma | seed | combined",
-    "framework": "react | vue"
-  },
-  "product": {
-    "name": "string",
-    "description": "string",
-    "platform_targets": ["web"]
-  },
-  "personas": [
-    {
-      "id": "string",
-      "name": "string",
-      "goal": "string",
-      "primary_flow": "flow_id"
-    }
-  ],
-  "screens": [
-    {
-      "screen_id": "string",
-      "screen_name": "string",
-      "description": "string",
-      "states": ["default", "loading", "error"],
-      "entry_points": ["screen_id"],
-      "exit_points": ["screen_id"],
-      "mock_data_needed": ["string — data type or entity name"],
-      "priority": "p0 | p1 | p2",
-      "notes": ""
-    }
-  ],
-  "flows": [
-    {
-      "flow_id": "string",
-      "flow_name": "string",
-      "flow_type": "primary | secondary | error",
-      "screens": ["screen_id"]
-    }
-  ],
-  "design_tokens": {
-    "tokens_source": "provided | hints | none",
-    "token_file_path": "relative path or null",
-    "hints": {
-      "colors": {},
-      "typography": {},
-      "spacing": {}
-    }
-  },
-  "constraints": [
-    {
-      "type": "platform | accessibility | framework | hard_rule",
-      "value": "string",
-      "source": "brief | seed | inferred"
-    }
-  ],
-  "analyst_notes": []
-}
-```
+Write `requirements.json` to `working_dir`. Schema: see `SCHEMAS.md` → `requirements.json`.
 
 ## Manifest Update
 
@@ -159,7 +96,20 @@ Before starting work, update `spa/public/pipeline-manifest.json`: set `pipeline.
 
 After writing `requirements.json`, update the manifest again:
 1. Set `pipeline.requirements.status` to `"ready"`.
-2. Set `byproducts.requirements` to the full parsed contents of `requirements.json` (the object, not a string).
+2. Set `byproducts.requirements` to a **summary object** derived from `requirements.json` — do **not** embed the full file:
+```json
+{
+  "product_name": "<product.name>",
+  "screen_count": 3,
+  "persona_count": 2,
+  "flow_count": 1,
+  "screens": [{ "screen_id": "string", "screen_name": "string", "priority": "p0" }],
+  "personas": [{ "id": "string", "name": "string" }],
+  "flows": [{ "flow_id": "string", "flow_name": "string" }],
+  "constraints": [{ "type": "string", "value": "string" }],
+  "analyst_notes": []
+}
+```
 
 Read, merge, write back. Never overwrite the full manifest.
 

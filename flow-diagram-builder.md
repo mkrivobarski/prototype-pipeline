@@ -178,28 +178,18 @@ After writing the Excalidraw JSON, also write `flow.html` — a self-contained H
 
 Replace `__EXCALIDRAW_JSON__` with the actual JSON content of `flow.excalidraw`. Must be served via HTTP (`python3 -m http.server`) — does not work as `file://`.
 
-After writing the Excalidraw JSON, write `flow-index.json`:
-
-```json
-{
-  "meta": {
-    "generated_from": "screen-map.json",
-    "generated_at": "ISO8601",
-    "total_screens": 0,
-    "excalidraw_file": "flow.excalidraw"
-  },
-  "screens": [
-    { "screen_id": "string", "screen_name": "string", "node_element_id": "string", "canvas_position": { "x": 0, "y": 0 } }
-  ]
-}
-```
+After writing the Excalidraw JSON, write `flow-index.json`. Schema: see `SCHEMAS.md` → `flow-index.json`.
 
 ## Manifest Update
 
-Before starting work, update `spa/public/pipeline-manifest.json`: set `pipeline.flow.status` to `"in_progress"` and `pipeline.flow.updated_at` to the current ISO8601 timestamp. Read, merge, write back.
+> **Serialisation note**: `flow-diagram-builder` and `journey-diagram-builder` run in parallel and both write to `pipeline-manifest.json`. To avoid a write collision, each agent must:
+> 1. Finish all file generation first
+> 2. Then read the manifest, apply its update, and write it back in a single operation
+>
+> Do not read the manifest at the start of your run to set `in_progress` — skip the `in_progress` update entirely. Only write once: the final `ready` state after all files are written.
 
 After writing `flow.excalidraw`, `flow.html`, and `flow-index.json`, update the manifest:
-1. Set `pipeline.flow.status` to `"ready"`.
+1. Set `pipeline.flow.status` to `"ready"` and `pipeline.flow.updated_at` to the current ISO8601 timestamp.
 2. Set `byproducts.flow.present` to `true` and `byproducts.flow.content` to the full raw text of `flow.excalidraw`.
 
 Read, merge, write back. Never overwrite the full manifest.

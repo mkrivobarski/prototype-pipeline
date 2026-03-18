@@ -71,43 +71,7 @@ Note: For Vue with hash history, the prototype also works when opened as a stati
 
 ### 4. Write `delivery-package.json`
 
-```json
-{
-  "meta": {
-    "project_name": "string",
-    "run_id": "string",
-    "completed_at": "ISO8601",
-    "framework": "react | vue",
-    "parity_score": 0.95,
-    "lo_fi_produced": false
-  },
-  "artifacts": [
-    {
-      "artifact_id": "string",
-      "path": "relative to working_dir",
-      "type": "config | requirements | screen_map | flow_diagram | user_journey | lo_fi | spa | validation | delivery",
-      "description": "string",
-      "required": true,
-      "present": true
-    }
-  ],
-  "screens": [
-    {
-      "screen_id": "string",
-      "screen_name": "string",
-      "route": "string",
-      "view_file": "spa/src/views/..."
-    }
-  ],
-  "run_instructions": {
-    "install": "cd <working_dir>/spa && npm install",
-    "dev": "npm run dev",
-    "url": "http://localhost:5173",
-    "static_open": "open <working_dir>/spa/index.html (Vue hash history only)"
-  },
-  "delivery_notes": []
-}
-```
+Schema: see `SCHEMAS.md` → `delivery-package.json`.
 
 ### 5. Write `PROTOTYPE.md`
 
@@ -154,7 +118,7 @@ Open http://localhost:5173
 | User journey | `journey.excalidraw` | Excalidraw persona journey map |
 | Journey viewer | `journey.html` | Standalone browser viewer — serve via `python3 -m http.server` |
 | Lo-fi wireframe | `lo-fi.excalidraw` | Grey-box wireframes — open in excalidraw.com or VS Code extension |
-| Lo-fi viewer | `lo-fi.html` | Embedded Excalidraw viewer — open in any browser (`open lo-fi.html`) |
+| Lo-fi viewer | `lo-fi.html` | Embedded Excalidraw viewer — requires local server: `cd <working_dir> && python3 -m http.server 7654` then open `http://localhost:7654/lo-fi.html` |
 | SPA prototype | `spa/` | Runnable React/Vue prototype |
 | Validation report | `validation-report.json` | Parity check results |
 

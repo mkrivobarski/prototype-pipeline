@@ -169,36 +169,18 @@ Write `journey.excalidraw` to `working_dir`.
 
 After writing the Excalidraw JSON, also write `journey.html` using the same pattern as `flow.html` and `lo-fi.html` — replace `__EXCALIDRAW_JSON__` with the actual JSON content. Title: "Journey Map". Must be served via HTTP.
 
-After writing the Excalidraw JSON, write `journey-index.json`:
-
-```json
-{
-  "meta": {
-    "generated_from": "requirements.json + screen-map.json",
-    "generated_at": "ISO8601",
-    "total_personas": 0,
-    "total_steps": 0,
-    "excalidraw_file": "journey.excalidraw"
-  },
-  "personas": [
-    {
-      "persona_id": "string",
-      "persona_name": "string",
-      "steps": [
-        { "step_index": 0, "label": "string", "phase": "string", "score": 4 }
-      ]
-    }
-  ],
-  "insights": ["string"]
-}
-```
+After writing the Excalidraw JSON, write `journey-index.json`. Schema: see `SCHEMAS.md` → `journey-index.json`.
 
 ## Manifest Update
 
-Before starting work, update `spa/public/pipeline-manifest.json`: set `pipeline.journey.status` to `"in_progress"` and `pipeline.journey.updated_at` to the current ISO8601 timestamp. Read, merge, write back.
+> **Serialisation note**: `flow-diagram-builder` and `journey-diagram-builder` run in parallel and both write to `pipeline-manifest.json`. To avoid a write collision, each agent must:
+> 1. Finish all file generation first
+> 2. Then read the manifest, apply its update, and write it back in a single operation
+>
+> Do not read the manifest at the start of your run to set `in_progress` — skip the `in_progress` update entirely. Only write once: the final `ready` state after all files are written.
 
 After writing `journey.excalidraw`, `journey.html`, and `journey-index.json`, update the manifest:
-1. Set `pipeline.journey.status` to `"ready"`.
+1. Set `pipeline.journey.status` to `"ready"` and `pipeline.journey.updated_at` to the current ISO8601 timestamp.
 2. Set `byproducts.journey.present` to `true` and `byproducts.journey.content` to the full raw text of `journey.excalidraw`.
 
 Read, merge, write back. Never overwrite the full manifest.

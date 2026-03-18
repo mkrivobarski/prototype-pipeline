@@ -124,39 +124,7 @@ Token check only applies when tokens are provided — recalculate weights propor
 
 ## Output Format
 
-Write `validation-report.json` to `working_dir`:
-
-```json
-{
-  "meta": {
-    "generated_at": "ISO8601",
-    "framework": "react | vue",
-    "parity_score": 0.95,
-    "result": "PASS | FAIL",
-    "gate_threshold": 0.90
-  },
-  "checks": [
-    {
-      "check_id": "route_coverage",
-      "name": "Route Coverage",
-      "weight": 0.25,
-      "result": "PASS | FAIL | WARN",
-      "score": 1.0,
-      "findings": []
-    }
-  ],
-  "blocking_issues": [
-    {
-      "check_id": "string",
-      "severity": "error | warning",
-      "message": "string",
-      "file": "spa/src/... or null",
-      "fix": "string — what spa-generator should do to fix this"
-    }
-  ],
-  "validator_notes": []
-}
-```
+Write `validation-report.json` to `working_dir`. Schema: see `SCHEMAS.md` → `validation-report.json`.
 
 If `result` is `FAIL`, print a summary of blocking issues and instruct the user to re-run `spa-generator` after addressing them (or to run it again directly — the generator should self-correct on a re-run if the issue is deterministic).
 

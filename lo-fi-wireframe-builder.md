@@ -84,6 +84,8 @@ Add a screen label above the frame:
   "type": "text",
   "x": <canvas_x>,
   "y": <canvas_y - 28>,
+  "width": <screen_name.length * 9>,
+  "height": 20,
   "text": "{screen_name}",
   "fontSize": 14,
   "fontFamily": 1,
@@ -109,7 +111,7 @@ For each zone (`header`, `content`, `footer`) inside the screen frame, create a 
 - `footer`: full width, 56px tall, bottom of frame
 - `content`: full width, remaining height between header and footer
 
-Add a zone label text node (12px, `#757575`, uppercase, positioned top-left of zone).
+Add a zone label text node (12px, `#757575`, uppercase, positioned top-left of zone) — include `"width": <zone_width>` and `"height": 16`.
 
 ### 4. Slot Placeholders
 
@@ -154,7 +156,7 @@ For each slot in each zone, create a rectangle placeholder:
 
 Stack slots vertically within each zone with 8px vertical gap.
 
-Add a label text node centred over each slot: `[slot_id] · [slot_type]`, 10px, `#424242`.
+Add a label text node centred over each slot: `[slot_id] · [slot_type]`, 10px, `#424242` — include `"width": <slot_width - 8>` and `"height": 14`.
 
 ### 5. Navigation Arrows
 
@@ -299,7 +301,7 @@ Before starting work, update `spa/public/pipeline-manifest.json`: set `pipeline.
 
 After writing `lo-fi.excalidraw`, `lo-fi.html`, and `lo-fi-index.json`, update the manifest:
 1. Set `pipeline.lo_fi.status` to `"ready"`.
-2. Set `byproducts.lo_fi.present` to `true`, `byproducts.lo_fi.content` to the full raw text of `lo-fi.excalidraw`, and `byproducts.lo_fi.screen_count` from `lo-fi-index.json`.
+2. Set `byproducts.lo_fi.present` to `true` and `byproducts.lo_fi.screen_count` from `lo-fi-index.json`.
 
 Read, merge, write back. Never overwrite the full manifest.
 
@@ -310,6 +312,7 @@ If `spa/public/pipeline-manifest.json` does not yet exist, skip both updates.
 - Every screen in `screen-map.json` must have a frame in the Excalidraw output
 - Every slot in every zone must have a placeholder rectangle
 - Arrows are only drawn for happy-path edges
+- **Every `type: "text"` element must include explicit `width` and `height` fields** — Excalidraw renders zero-size text (invisible) when these are omitted
 - The Excalidraw JSON must be valid and importable (no undefined fields, valid element types)
 - Write `lo-fi.excalidraw`, `lo-fi.html`, and `lo-fi-index.json` before declaring completion
 - `lo-fi.html` must be self-contained — embed the Excalidraw JSON inline; do not reference `lo-fi.excalidraw` as an external file

@@ -66,15 +66,15 @@ For each step column:
 ### 4. Elements to Generate
 
 #### Title
-One text node at top: project name + "— User Journey", 16px, `#e2e8f0`.
+One text node at top: project name + "— User Journey", 16px, `#e2e8f0` — include `"width": <text.length * 10>` and `"height": 22`.
 
 #### Persona Label
-Left of each band: persona name, 13px bold, `#e2e8f0`, rotated 0° (horizontal), at `x: step_x_start - 10, y: band_y + 60` — or as a label rectangle if easier.
+Left of each band: persona name, 13px bold, `#e2e8f0`, rotated 0° (horizontal), at `x: step_x_start - 10, y: band_y + 60` — include `"width": 120` and `"height": 18` — or as a label rectangle if easier.
 
 #### Phase Headers
 For each phase (Discovery, Core Use, Completion, Return):
 - Rectangle spanning the phase's columns: `backgroundColor: "#1e293b"`, `strokeColor: "#334155"`, height 32px
-- Phase name text: 11px, `#64748b`, uppercase, centred in the rectangle
+- Phase name text: 11px, `#64748b`, uppercase, centred in the rectangle — include `"width": <rect_width>` and `"height": 16`
 
 #### Step Cells
 For each step in each phase, at `(step_x, band_y + 32)`:
@@ -154,7 +154,7 @@ Score colours:
 ```
 
 #### Insight Notes
-After all persona bands, add a text block with the key insights: lowest-scoring steps, friction points, improvement opportunities. 12px, `#64748b`, at the bottom of the canvas.
+After all persona bands, add a text block with the key insights: lowest-scoring steps, friction points, improvement opportunities. 12px, `#64748b`, at the bottom of the canvas — include `"width": 600` and `"height": <line_count * 18>`.
 
 ### 5. Connecting Line
 For each persona, draw a polyline through all score bar midpoints to show the satisfaction arc:
@@ -181,7 +181,7 @@ After writing the Excalidraw JSON, write `journey-index.json`. Schema: see `SCHE
 
 After writing `journey.excalidraw`, `journey.html`, and `journey-index.json`, update the manifest:
 1. Set `pipeline.journey.status` to `"ready"` and `pipeline.journey.updated_at` to the current ISO8601 timestamp.
-2. Set `byproducts.journey.present` to `true` and `byproducts.journey.content` to the full raw text of `journey.excalidraw`.
+2. Set `byproducts.journey.present` to `true`.
 
 Read, merge, write back. Never overwrite the full manifest.
 

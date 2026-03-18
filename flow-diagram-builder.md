@@ -114,7 +114,7 @@ For each happy-path navigation edge in `screen-map.json`, draw an arrow from the
 }
 ```
 
-Add an arrow label text node midway: trigger text, 10px, `#94a3b8`.
+Add an arrow label text node midway: trigger text, 10px, `#94a3b8` — include `"width": <text.length * 7>` and `"height": 14`.
 
 Back-edges (navigating upward in the hierarchy, e.g. Back to Dashboard) use `strokeColor: "#475569"` and a dashed style (`strokeStyle: "dashed"`).
 
@@ -122,7 +122,7 @@ Only draw arrows for `is_happy_path: true` edges.
 
 ### 4. Flow Section Labels
 
-Above each horizontal row of nodes, add a section title text node identifying which flow the row belongs to. 11px, `#64748b`, uppercase.
+Above each horizontal row of nodes, add a section title text node identifying which flow the row belongs to. 11px, `#64748b`, uppercase — include `"width": 200` and `"height": 16`.
 
 ### 5. Summary vs Per-Flow
 
@@ -190,7 +190,7 @@ After writing the Excalidraw JSON, write `flow-index.json`. Schema: see `SCHEMAS
 
 After writing `flow.excalidraw`, `flow.html`, and `flow-index.json`, update the manifest:
 1. Set `pipeline.flow.status` to `"ready"` and `pipeline.flow.updated_at` to the current ISO8601 timestamp.
-2. Set `byproducts.flow.present` to `true` and `byproducts.flow.content` to the full raw text of `flow.excalidraw`.
+2. Set `byproducts.flow.present` to `true`.
 
 Read, merge, write back. Never overwrite the full manifest.
 

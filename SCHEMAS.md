@@ -37,9 +37,9 @@ Written by `shell-scaffolder`. Updated incrementally by every downstream agent v
       "constraints": [{ "type": "string", "value": "string" }],
       "analyst_notes": []
     },
-    "flow":    { "present": false, "content": "string | null" },
-    "journey": { "present": false, "content": "string | null" },
-    "lo_fi":   { "present": false, "content": "string | null", "screen_count": 0 }
+    "flow":    { "present": false },
+    "journey": { "present": false },
+    "lo_fi":   { "present": false, "screen_count": 0 }
   },
   "artifacts": [
     { "name": "string", "file": "string", "description": "string", "present": true }

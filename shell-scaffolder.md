@@ -49,9 +49,9 @@ This file is written now and updated by every downstream agent. The shell polls 
   "screens": [],
   "byproducts": {
     "requirements": null,
-    "flow":    { "present": false, "content": null },
-    "journey": { "present": false, "content": null },
-    "lo_fi":   { "present": false, "content": null, "screen_count": 0 }
+    "flow":    { "present": false },
+    "journey": { "present": false },
+    "lo_fi":   { "present": false, "screen_count": 0 }
   },
   "artifacts": []
 }

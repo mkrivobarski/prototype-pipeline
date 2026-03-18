@@ -80,8 +80,8 @@ Where possible, edit only the affected files rather than regenerating everything
 
 | Change type | What to edit |
 |---|---|
-| New screen | Create new view file; update router.jsx; create/update shared components if needed; add mock data |
-| Remove screen | Delete view file; remove route from router.jsx; remove from mock-data.json if entity is screen-exclusive |
+| New screen | Create new view file; update router.jsx; create/update shared components if needed; add mock data; update `public/pipeline-manifest.json` screens array |
+| Remove screen | Delete view file; remove route from router.jsx; remove from mock-data.json if entity is screen-exclusive; update `public/pipeline-manifest.json` screens array |
 | Screen layout | Rewrite affected view file only |
 | Navigation | Update navigate() calls in affected source view(s); update router.jsx if route path changed |
 | UI component | Rewrite affected section of view or shared component |

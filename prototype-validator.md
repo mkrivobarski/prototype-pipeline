@@ -90,6 +90,17 @@ Pass condition: `tokens.css` exists and is referenced.
 
 Pass condition: All framework entry files present and correctly structured.
 
+### 8. Pipeline Shell Check
+
+- `spa/src/shell/PipelineShell.jsx` (React) or `spa/src/shell/PipelineShell.vue` (Vue) exists
+- `spa/public/pipeline-manifest.json` exists and is valid JSON with `byproducts.flow.content` and `byproducts.journey.content` fields
+- `spa/src/styles/shell.css` exists
+- `PipelineShell` is imported and used in `App.jsx` / `App.vue`
+- `mermaid` is listed in `package.json` dependencies
+- No `ppl-` class names appear in any file outside `shell/` and `shell.css`
+
+Pass condition: Shell files present, manifest valid, no style leakage.
+
 ## Scoring
 
 Calculate a parity score (0.0–1.0):
@@ -101,10 +112,11 @@ Individual check weights:
 | Check | Weight |
 |---|---|
 | Route coverage | 0.25 |
-| Import resolution | 0.25 |
-| Component completeness | 0.20 |
+| Import resolution | 0.20 |
+| Component completeness | 0.18 |
 | Mock data coverage | 0.15 |
 | Navigation consistency | 0.10 |
+| Pipeline shell | 0.07 |
 | Framework files | 0.05 |
 
 Token check only applies when tokens are provided — recalculate weights proportionally when it applies.

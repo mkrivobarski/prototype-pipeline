@@ -115,10 +115,20 @@ spa/
   index.html
   vite.config.js
   package.json
+  public/
+    pipeline-manifest.json        (copy of spa-manifest.json + byproduct content — served statically)
   src/
     main.jsx
     App.jsx
     router.jsx
+    shell/
+      PipelineShell.jsx           (wrapper with tab nav between prototype and byproducts)
+      PipelineShell.module.css
+      tabs/
+        FlowTab.jsx               (renders flow.mmd via mermaid)
+        JourneyTab.jsx            (renders journey.mmd via mermaid)
+        WireframeTab.jsx          (shows lo-fi wireframe info + download link, or hidden if not present)
+        ArtifactsTab.jsx          (lists all pipeline artifacts with descriptions)
     views/
       <ScreenName>View.jsx        (one per screen)
     components/
@@ -129,6 +139,7 @@ spa/
     styles/
       index.css
       tokens.css                  (only if tokens provided)
+      shell.css                   (shell-specific styles, isolated from prototype styles)
 ```
 
 **Vue:**
@@ -137,11 +148,20 @@ spa/
   index.html
   vite.config.js
   package.json
+  public/
+    pipeline-manifest.json
   src/
     main.js
     App.vue
     router/
       index.js
+    shell/
+      PipelineShell.vue
+      tabs/
+        FlowTab.vue
+        JourneyTab.vue
+        WireframeTab.vue
+        ArtifactsTab.vue
     views/
       <ScreenName>View.vue
     components/
@@ -151,6 +171,7 @@ spa/
     styles/
       index.css
       tokens.css
+      shell.css
 ```
 
 ### 2. Generate `mock-data.json`
@@ -271,7 +292,8 @@ Key rules regardless of mode:
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.0"
+    "react-router-dom": "^6.26.0",
+    "mermaid": "^11.0.0"
   },
   "devDependencies": {
     "vite": "^5.4.0",
@@ -293,13 +315,145 @@ Key rules regardless of mode:
   },
   "dependencies": {
     "vue": "^3.5.0",
-    "vue-router": "^4.4.0"
+    "vue-router": "^4.4.0",
+    "mermaid": "^11.0.0"
   },
   "devDependencies": {
     "vite": "^5.4.0",
     "@vitejs/plugin-vue": "^5.1.0"
   }
 }
+```
+
+### 8. Generate Pipeline Shell
+
+The pipeline shell is a lightweight dev wrapper that sits outside the prototype's own styles and routing. It provides a persistent top bar with tabs to switch between the prototype and its byproducts. It must never interfere with the prototype's appearance or behaviour.
+
+#### Shell design
+
+- A fixed top bar: `[▶ Prototype] [~ Flow] [~ Journey] [⬡ Wireframe] [◎ Artifacts]`
+- Clicking a tab swaps the content area below the bar
+- **Prototype** tab shows the prototype in full — the router and all views run normally inside it
+- The shell top bar uses its own isolated CSS class namespace (`ppl-*`) and is scoped entirely to `shell.css` — it must not inherit from or override the prototype's styles
+- Shell background: `#1a1a2e` (dark navy), tab text: `#e2e8f0`, active tab accent: `#6366f1` (indigo)
+- Shell font: system UI stack, 13px — visually distinct from whatever the prototype uses
+
+#### `public/pipeline-manifest.json`
+
+Before generating the shell, write `spa/public/pipeline-manifest.json`. This file is served statically by Vite and read at runtime by the shell. It contains all byproduct content inlined so the shell works with zero additional fetch calls:
+
+```json
+{
+  "project_name": "<project name from requirements.json>",
+  "run_id": "<run_id from pipeline.config.json>",
+  "framework": "react | vue",
+  "generated_at": "ISO8601",
+  "screens": [
+    { "screen_id": "string", "screen_name": "string", "route": "string" }
+  ],
+  "byproducts": {
+    "flow": {
+      "present": true,
+      "content": "<full text content of flow.mmd>"
+    },
+    "journey": {
+      "present": true,
+      "content": "<full text content of journey.mmd>"
+    },
+    "lo_fi": {
+      "present": false,
+      "excalidraw_url": "../lo-fi.excalidraw",
+      "screen_count": 0
+    }
+  },
+  "artifacts": [
+    { "name": "Flow Diagram", "file": "flow.mmd", "description": "Mermaid screen navigation flowchart" },
+    { "name": "User Journey", "file": "journey.mmd", "description": "Mermaid persona journey map" },
+    { "name": "Lo-fi Wireframe", "file": "lo-fi.excalidraw", "description": "Excalidraw grey-box wireframes", "present": false },
+    { "name": "Screen Map", "file": "screen-map.json", "description": "Canonical screen inventory" },
+    { "name": "Requirements", "file": "requirements.json", "description": "Structured product requirements" },
+    { "name": "Validation Report", "file": "validation-report.json", "description": "Parity check results" }
+  ]
+}
+```
+
+Read `flow.mmd` and `journey.mmd` from `output_dir` and embed their full text content into the `byproducts.flow.content` and `byproducts.journey.content` fields. If `lo_fi_enabled: true`, set `lo_fi.present: true` and `lo_fi.screen_count` from `lo-fi-index.json`.
+
+#### `src/shell/PipelineShell` (React `.jsx` / Vue `.vue`)
+
+The shell component:
+
+1. On mount, `fetch('/pipeline-manifest.json')` and store in state
+2. Tracks `activeTab`: one of `prototype | flow | journey | wireframe | artifacts`
+3. Renders a fixed top bar with 5 tab buttons (hide `wireframe` tab if `lo_fi.present` is false)
+4. Renders the content area based on `activeTab`:
+   - `prototype` — renders `<div className="ppl-prototype-frame">` containing the framework's router outlet (`<RouterProvider>` / `<RouterView>`) — the prototype runs normally here
+   - `flow` — renders `<FlowTab content={manifest.byproducts.flow.content} />`
+   - `journey` — renders `<JourneyTab content={manifest.byproducts.journey.content} />`
+   - `wireframe` — renders `<WireframeTab loFi={manifest.byproducts.lo_fi} />`
+   - `artifacts` — renders `<ArtifactsTab artifacts={manifest.artifacts} screens={manifest.screens} />`
+
+The `ppl-prototype-frame` div must fill the remaining viewport below the shell bar and must not clip or constrain the prototype's own scrolling or layout.
+
+#### Tab components
+
+**`FlowTab`** and **`JourneyTab`**:
+- Accept a `content` prop (the raw Mermaid source string)
+- On mount, call `mermaid.render('diagram-id', content)` and inject the returned SVG into the DOM
+- Use `mermaid.initialize({ startOnLoad: false, theme: 'dark' })` once at module level
+- Display a "No diagram available" message if `content` is empty or null
+
+**`WireframeTab`**:
+- If `loFi.present` is false: show "No lo-fi wireframes were generated for this run."
+- If `loFi.present` is true: show the screen count, a note that the file is at `../lo-fi.excalidraw` relative to the run directory, and a button `<a href="../lo-fi.excalidraw" download>Download lo-fi.excalidraw</a>` — this works when the prototype is served via `npm run dev` from within `spa/`
+- Also show a tip: "Open at excalidraw.com to view the wireframes."
+
+**`ArtifactsTab`**:
+- List all entries from `manifest.artifacts`, showing name, file path, and description
+- Mark absent artifacts (those without `present: true` or where `present: false`) with a dimmed style
+- List all screens from `manifest.screens` in a table: screen name, route
+
+#### `src/styles/shell.css`
+
+All shell styles use the `ppl-` prefix. Key rules:
+- `.ppl-shell` — `position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: #1a1a2e; font-family: system-ui, sans-serif; font-size: 13px;`
+- `.ppl-tab-bar` — `display: flex; gap: 2px; padding: 6px 12px; border-bottom: 1px solid #2d2d4e;`
+- `.ppl-tab` — `padding: 5px 14px; border-radius: 4px; border: none; background: transparent; color: #94a3b8; cursor: pointer;`
+- `.ppl-tab.ppl-active` — `background: #6366f1; color: #fff;`
+- `.ppl-content` — `position: fixed; top: 37px; left: 0; right: 0; bottom: 0; overflow: auto;`
+- `.ppl-prototype-frame` — `width: 100%; height: 100%;`
+- `.ppl-mermaid` — `padding: 24px; background: #111827;` — contains the rendered SVG
+- `.ppl-artifacts-list` — `padding: 24px; color: #e2e8f0;`
+- `.ppl-artifact-absent` — `opacity: 0.4;`
+
+`shell.css` is imported only in `PipelineShell` — never in `App` or any prototype component.
+
+#### Wiring into `App` (React) / `App.vue` (Vue)
+
+**React `App.jsx`**: Wrap `RouterProvider` inside `PipelineShell`:
+```jsx
+import PipelineShell from './shell/PipelineShell'
+import { RouterProvider } from 'react-router-dom'
+import { router } from './router'
+
+export default function App() {
+  return (
+    <PipelineShell>
+      <RouterProvider router={router} />
+    </PipelineShell>
+  )
+}
+```
+
+`PipelineShell` renders its children inside the `ppl-prototype-frame` div when the Prototype tab is active, and replaces the content area with the appropriate tab component otherwise.
+
+**Vue `App.vue`**: Pass `<RouterView />` as the default slot to `PipelineShell`:
+```vue
+<template>
+  <PipelineShell>
+    <RouterView />
+  </PipelineShell>
+</template>
 ```
 
 ## Output
@@ -314,6 +468,7 @@ Write all files to `spa/` within `output_dir`. Write a manifest of all generated
     "output_dir": "/absolute/path",
     "total_views": 0,
     "total_components": 0,
+    "shell_generated": true,
     "design_system_applied": {
       "mode": "none | css | json_tokens | figma | tailwind | named | description",
       "source": "path or description or null",
@@ -326,7 +481,9 @@ Write all files to `spa/` within `output_dir`. Write a manifest of all generated
   "files": [
     { "path": "spa/src/views/HomeView.jsx", "type": "view", "screen_id": "home" },
     { "path": "spa/src/components/NavBar.jsx", "type": "component" },
-    { "path": "spa/src/data/mock-data.json", "type": "data" }
+    { "path": "spa/src/data/mock-data.json", "type": "data" },
+    { "path": "spa/src/shell/PipelineShell.jsx", "type": "shell" },
+    { "path": "spa/public/pipeline-manifest.json", "type": "shell_data" }
   ],
   "routes": [
     { "path": "/", "view": "HomeView", "screen_id": "home" }
@@ -341,6 +498,9 @@ Write all files to `spa/` within `output_dir`. Write a manifest of all generated
 - Every form field must have a `value` + `onChange` (React) or `v-model` (Vue) — no uncontrolled inputs
 - Every list render must handle the empty state case
 - All navigation must use the router — no `window.location` or `<a href>`
+- Shell CSS must use only `ppl-` prefixed classes — never bleed into prototype styles
+- The shell must not add padding-top or margin-top to the prototype frame — the 37px shell bar height is handled by `ppl-content` positioning
+- Write `public/pipeline-manifest.json` before generating shell components — the tab components depend on its shape
 - Write `spa-manifest.json` before declaring completion
 - All reads and writes must be scoped to `working_dir`
 - Do not write files outside `spa/` within `working_dir` (except `spa-manifest.json`)

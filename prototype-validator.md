@@ -93,11 +93,10 @@ Pass condition: All framework entry files present and correctly structured.
 ### 8. Pipeline Shell Check
 
 - `spa/src/shell/PipelineShell.jsx` (React) or `spa/src/shell/PipelineShell.vue` (Vue) exists
-- `spa/public/pipeline-manifest.json` exists and is valid JSON with `byproducts.flow.content` and `byproducts.journey.content` fields
+- `spa/public/pipeline-manifest.json` exists and is valid JSON with `byproducts.flow.content` and `byproducts.journey.content` fields (Excalidraw JSON strings); when `lo_fi_enabled: true`, also has `byproducts.lo_fi.content` (non-null string)
 - `spa/src/styles/shell.css` exists
 - `PipelineShell` is imported and used in `App.jsx` / `App.vue`
-- `mermaid` is listed in `package.json` dependencies
-- No `ppl-` class names appear in any file outside `shell/` and `shell.css`
+- `@excalidraw/excalidraw` is listed in `package.json` dependencies- No `ppl-` class names appear in any file outside `shell/` and `shell.css`
 
 Pass condition: Shell files present, manifest valid, no style leakage.
 

@@ -137,6 +137,14 @@ Write `screen-map.json` to `working_dir`:
 }
 ```
 
+## Manifest Update
+
+Before starting work, update `spa/public/pipeline-manifest.json`: set `pipeline.screen_map.status` to `"in_progress"` and `pipeline.screen_map.updated_at` to the current ISO8601 timestamp. Read, merge, write back.
+
+After writing `screen-map.json`, update the manifest again: set `pipeline.screen_map.status` to `"ready"`. Read, merge, write back. Never overwrite the full manifest.
+
+If `spa/public/pipeline-manifest.json` does not yet exist, skip both updates.
+
 ## Rules
 - Every screen in `requirements.json` must appear in `screen-map.json`
 - The entry screen is the first `p0` screen in the primary flow

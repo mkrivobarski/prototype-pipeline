@@ -85,10 +85,10 @@ If not already set in `pipeline.config.json`, confirm — ask all at once as a s
      - JSON token file (e.g. Style Dictionary output, Figma tokens export, `tokens.json`)
      - Figma file URL (tokens extracted via Figma MCP)
      - Tailwind config (`tailwind.config.js` or `tailwind.config.ts`)
-     - Named design system (e.g. "shadcn", "Ant Design", "Material UI") — agent applies known defaults
+     - Named design system (e.g. "shadcn", "Ant Design", "Material UI", "SAP Fiori") — agent applies known defaults
      - Plain description (e.g. "dark theme, Inter font, purple primary")
    - If provided, record in `design_system` in `pipeline.config.json` (see schema below)
-   - If not provided, record `design_system.mode: "none"` — the SPA generator uses a minimal base stylesheet
+   - **If not provided (user says "no", "none", or skips), default to SAP Fiori**: record `design_system.mode: "named"` and `design_system.named_system: "fiori"`. Do NOT fall back to `mode: "none"` unless the user explicitly requests a plain/unstyled output.
 
    Do NOT assume tokens are unavailable without asking — this question is always required.
 
@@ -121,7 +121,7 @@ Write the resolved config (overwrite if it already existed with incomplete value
     "json_tokens_path": "absolute or relative path to token JSON, or null",
     "figma_file_url": "Figma URL for token extraction, or null",
     "tailwind_config_path": "absolute or relative path to tailwind.config.*, or null",
-    "named_system": "shadcn | antd | mui | chakra | or null",
+    "named_system": "shadcn | antd | mui | chakra | fiori | or null",
     "description": "plain text description of styling intent, or null"
   }
 }

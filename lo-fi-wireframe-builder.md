@@ -188,6 +188,54 @@ In the top-right corner of each frame, add a small index label: `#{screen_index 
 
 Write `lo-fi.excalidraw` to `working_dir` with the full Excalidraw JSON structure described above.
 
+### Embedded Viewer — `lo-fi.html`
+
+After writing the Excalidraw JSON, also write `lo-fi.html` to `working_dir`. This is a self-contained HTML file that renders the wireframes in an embedded Excalidraw window using the official CDN bundle — no login, no extension, no external upload required.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lo-Fi Wireframes</title>
+  <link rel="stylesheet" href="https://esm.sh/@excalidraw/excalidraw@0.18.0/dist/prod/index.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #f0f0f0; font-family: system-ui, sans-serif; }
+    #root { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module">
+    import React from 'https://esm.sh/react@18.3.1';
+    import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
+    import { Excalidraw } from 'https://esm.sh/@excalidraw/excalidraw@0.18.0?deps=react@18.3.1,react-dom@18.3.1';
+
+    const EXCALIDRAW_DATA = __EXCALIDRAW_JSON__;
+
+    const App = () => React.createElement(Excalidraw, {
+      initialData: {
+        elements: EXCALIDRAW_DATA.elements,
+        appState: { ...EXCALIDRAW_DATA.appState, viewModeEnabled: false },
+        files: EXCALIDRAW_DATA.files || {}
+      },
+      UIOptions: {
+        canvasActions: { export: false, saveAsImage: true, loadScene: false, saveToActiveFile: false }
+      }
+    });
+
+    createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
+</body>
+</html>
+```
+
+When writing `lo-fi.html`, replace the placeholder `__EXCALIDRAW_JSON__` with the actual JSON string (the same content written to `lo-fi.excalidraw`), so the file is fully self-contained.
+
+**Important**: `lo-fi.html` uses ES module imports from `esm.sh` and must be served over HTTP — it will not work when opened as a `file://` URL due to browser security restrictions on ES modules. The gate message must include the one-liner to start a local server.
+
 After writing the JSON, write `lo-fi-index.json` as a companion:
 
 ```json
@@ -230,7 +278,10 @@ Print a gate message:
 ```
 ── LO-FI GATE ──
 Lo-fi wireframes written to: lo-fi.excalidraw
-Open in Excalidraw (excalidraw.com or VS Code extension) to review.
+Interactive viewer (requires local server):
+
+  cd <working_dir> && python3 -m http.server 7654
+  open http://localhost:7654/lo-fi.html
 
 The SPA generator will use these screens as source of truth for routes and components.
 Each frame in the wireframe maps to one route in the SPA.
@@ -242,11 +293,24 @@ Do NOT run `spa-generator` automatically — wait for the user to proceed.
 
 If `output.lo_fi_gate: false`, write the gate message as a log entry only and indicate that `spa-generator` can proceed.
 
+## Manifest Update
+
+Before starting work, update `spa/public/pipeline-manifest.json`: set `pipeline.lo_fi.status` to `"in_progress"` and `pipeline.lo_fi.updated_at` to the current ISO8601 timestamp. Read, merge, write back.
+
+After writing `lo-fi.excalidraw`, `lo-fi.html`, and `lo-fi-index.json`, update the manifest:
+1. Set `pipeline.lo_fi.status` to `"ready"`.
+2. Set `byproducts.lo_fi.present` to `true`, `byproducts.lo_fi.content` to the full raw text of `lo-fi.excalidraw`, and `byproducts.lo_fi.screen_count` from `lo-fi-index.json`.
+
+Read, merge, write back. Never overwrite the full manifest.
+
+If `spa/public/pipeline-manifest.json` does not yet exist, skip both updates.
+
 ## Rules
 - Only run if `output.lo_fi_enabled: true` in `pipeline.config.json` — exit with an informational message otherwise
 - Every screen in `screen-map.json` must have a frame in the Excalidraw output
 - Every slot in every zone must have a placeholder rectangle
 - Arrows are only drawn for happy-path edges
 - The Excalidraw JSON must be valid and importable (no undefined fields, valid element types)
-- Write `lo-fi.excalidraw` and `lo-fi-index.json` before declaring completion
+- Write `lo-fi.excalidraw`, `lo-fi.html`, and `lo-fi-index.json` before declaring completion
+- `lo-fi.html` must be self-contained — embed the Excalidraw JSON inline; do not reference `lo-fi.excalidraw` as an external file
 - All reads and writes must be scoped to `working_dir`

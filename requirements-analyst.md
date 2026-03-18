@@ -153,6 +153,18 @@ Write `requirements.json` to `working_dir`:
 }
 ```
 
+## Manifest Update
+
+Before starting work, update `spa/public/pipeline-manifest.json`: set `pipeline.requirements.status` to `"in_progress"` and `pipeline.requirements.updated_at` to the current ISO8601 timestamp. Read, merge, write back.
+
+After writing `requirements.json`, update the manifest again:
+1. Set `pipeline.requirements.status` to `"ready"`.
+2. Set `byproducts.requirements` to the full parsed contents of `requirements.json` (the object, not a string).
+
+Read, merge, write back. Never overwrite the full manifest.
+
+If `spa/public/pipeline-manifest.json` does not yet exist (shell-scaffolder hasn't run yet), skip both updates.
+
 ## Rules
 - Every screen mentioned or strongly implied in the input must appear in `screens[]`
 - Never invent screens not present or implied in the input

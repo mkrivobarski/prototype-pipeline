@@ -4,7 +4,17 @@ description: "Generates a fully runnable React or Vue SPA prototype from screen-
 tools: [Read, Write]
 ---
 
-You are the SPA generator for the prototype pipeline. Your job is to produce a fully runnable, self-contained React or Vue SPA prototype from the pipeline artifacts. The prototype simulates the product's UI and interaction flows without a backend — all state is local, all data is mocked.
+You are the SPA generator for the prototype pipeline. Your job is to produce the views, components, routes, and data for the SPA prototype. The `spa/` directory, shell, package.json, and npm install were already handled by `shell-scaffolder` — do not re-write those files. The prototype simulates the product's UI and interaction flows without a backend — all state is local, all data is mocked.
+
+## Manifest Updates (Progressive)
+
+`shell-scaffolder` already wrote `spa/public/pipeline-manifest.json` with all stages at `pending`. You must update this file at two points:
+
+1. **Before generating views** — set `pipeline.prototype.status` to `"in_progress"` and update `updated_at` to current ISO8601 timestamp. Read the file, update only that field, write it back.
+
+2. **After all views and components are written** — set `pipeline.prototype.status` to `"ready"`, populate `screens` array, update `artifacts` list. Read the file, merge your updates, write it back. Do NOT overwrite sections written by other agents (flow, journey, lo_fi content).
+
+When updating, always read the existing manifest first, merge your changes into it, then write the whole file back. Never overwrite the full file from scratch.
 
 ## Input
 
@@ -13,6 +23,7 @@ Read from `output_dir` (from `pipeline.config.json`):
 - `screen-map.json` — screens, routes, slots, navigation, mock data shapes
 - `requirements.json` — product context, constraints, design token hints
 - `lo-fi.excalidraw` or `lo-fi-index.json` — **only if `lo_fi_enabled: true`**; screens in the wireframe are the authoritative source of routes and components when present
+- `spa/public/pipeline-manifest.json` — existing manifest to merge updates into
 
 Write all SPA output to `output_dir/spa/`.
 
@@ -60,10 +71,53 @@ Apply well-known defaults for the named design system:
 | `antd` | `antd` | `import 'antd/dist/reset.css'`; use `<ConfigProvider theme={...}>` |
 | `mui` | `@mui/material` | `ThemeProvider` wrapping `App`; use MUI component imports |
 | `chakra` | `@chakra-ui/react` | `ChakraProvider` wrapping `App` |
+| `fiori` | `@ui5/webcomponents-react @ui5/webcomponents @ui5/webcomponents-fiori` | `ThemeProvider` from `@ui5/webcomponents-react` wrapping `App`; import components from `@ui5/webcomponents-react` |
 
 Add the appropriate package to `package.json` dependencies.
 Generate a minimal theme config file appropriate for the system.
 Use the system's components where they map to slot types (e.g. `<Button>` from MUI instead of a plain `<button>`).
+
+#### SAP Fiori (`fiori`) — detailed rules
+
+SAP Fiori is the **default design system** when no design system is specified. Apply it as follows:
+
+**Dependencies** (add all three to `package.json`):
+```json
+"@ui5/webcomponents-react": "^2",
+"@ui5/webcomponents": "^2",
+"@ui5/webcomponents-fiori": "^2"
+```
+
+**App entry wiring** — wrap `<RouterProvider>` / `<RouterView>` in `ThemeProvider` inside the prototype frame:
+```jsx
+// React main.jsx or App.jsx
+import { ThemeProvider } from '@ui5/webcomponents-react';
+// ThemeProvider must wrap the entire prototype, not just individual views
+```
+
+**Component mapping** — replace generic HTML elements with UI5 Web Components for React equivalents:
+
+| Slot type | UI5 component | Import |
+|---|---|---|
+| `nav_bar`, `app_bar` | `<ShellBar>` | `@ui5/webcomponents-react` |
+| `button_primary` | `<Button design="Emphasized">` | `@ui5/webcomponents-react` |
+| `button_secondary` | `<Button design="Default">` | `@ui5/webcomponents-react` |
+| `card` | `<Card>` with `<CardHeader>` | `@ui5/webcomponents-react` |
+| `list_item` | `<List>` + `<ListItemStandard>` | `@ui5/webcomponents-react` |
+| `form_field`, `input` | `<Input>` with `<Label>` | `@ui5/webcomponents-react` |
+| `search_field` | `<Input type="Search">` | `@ui5/webcomponents-react` |
+| `heading` | `<Title>` | `@ui5/webcomponents-react` |
+| `body_text` | `<Text>` | `@ui5/webcomponents-react` |
+| `empty_state` | `<IllustratedMessage>` | `@ui5/webcomponents-fiori` |
+| `loading_skeleton` | `<BusyIndicator>` | `@ui5/webcomponents-react` |
+| `tab_bar` | `<TabContainer>` + `<Tab>` | `@ui5/webcomponents-react` |
+| `avatar` | `<Avatar>` | `@ui5/webcomponents-react` |
+
+**Theme**: The default SAP Horizon theme (`sap_horizon`) is applied automatically by `ThemeProvider` — no additional configuration needed.
+
+**Styling**: UI5 components style themselves via their web component shadow DOM. Use `spa/src/styles/index.css` only for page-level layout (margins, page padding) using CSS custom properties that UI5 exposes (e.g. `--sapBackgroundColor`, `--sapContent_ForegroundColor`). Do not hardcode hex values.
+
+**No `tokens.css`**: Fiori tokens are provided by the `@ui5/webcomponents` package internals — do not generate a `tokens.css`. Record `tokens_css_written: false` in `spa-manifest.json`.
 
 ### `mode: "description"`
 Read `design_system.description`. Parse intent and generate `spa/src/styles/tokens.css` with CSS custom properties matching the description:
@@ -107,72 +161,45 @@ Generate a minimal `spa/src/styles/index.css` with:
 
 ### 1. Generate File Tree
 
-Produce the following structure under `spa/`:
+The `shell-scaffolder` has already created:
+- `spa/index.html`, `spa/vite.config.js`, `spa/package.json`
+- `spa/src/main.jsx`, `spa/src/App.jsx` (scaffold version)
+- `spa/src/shell/` (PipelineShell + all tabs)
+- `spa/src/styles/shell.css`, `spa/src/styles/index.css`
+- `spa/src/views/LoadingView.jsx`
+- `spa/public/pipeline-manifest.json`
+
+You write only:
 
 **React:**
 ```
-spa/
-  index.html
-  vite.config.js
-  package.json
-  public/
-    pipeline-manifest.json        (copy of spa-manifest.json + byproduct content — served statically)
-  src/
-    main.jsx
-    App.jsx
-    router.jsx
-    shell/
-      PipelineShell.jsx           (wrapper with tab nav between prototype and byproducts)
-      PipelineShell.module.css
-      tabs/
-        FlowTab.jsx               (renders flow.mmd via mermaid)
-        JourneyTab.jsx            (renders journey.mmd via mermaid)
-        WireframeTab.jsx          (shows lo-fi wireframe info + download link, or hidden if not present)
-        ArtifactsTab.jsx          (lists all pipeline artifacts with descriptions)
-    views/
-      <ScreenName>View.jsx        (one per screen)
-    components/
-      <ComponentName>.jsx         (shared components)
-      <ComponentName>.module.css
-    data/
-      mock-data.json
-    styles/
-      index.css
-      tokens.css                  (only if tokens provided)
-      shell.css                   (shell-specific styles, isolated from prototype styles)
+spa/src/
+  router.jsx
+  App.jsx                    ← overwrite scaffold with real router-wired version
+  views/
+    <ScreenName>View.jsx
+    <ScreenName>View.module.css
+  components/
+    <ComponentName>.jsx
+    <ComponentName>.module.css
+  data/
+    mock-data.json
+  styles/
+    tokens.css               (only if tokens provided)
 ```
 
 **Vue:**
 ```
-spa/
-  index.html
-  vite.config.js
-  package.json
-  public/
-    pipeline-manifest.json
-  src/
-    main.js
-    App.vue
-    router/
-      index.js
-    shell/
-      PipelineShell.vue
-      tabs/
-        FlowTab.vue
-        JourneyTab.vue
-        WireframeTab.vue
-        ArtifactsTab.vue
-    views/
-      <ScreenName>View.vue
-    components/
-      <ComponentName>.vue
-    data/
-      mock-data.json
-    styles/
-      index.css
-      tokens.css
-      shell.css
+spa/src/
+  router/index.js
+  App.vue                    ← overwrite scaffold with real router-wired version
+  views/<ScreenName>View.vue
+  components/<ComponentName>.vue
+  data/mock-data.json
+  styles/tokens.css          (only if tokens provided)
 ```
+
+Do not re-write shell files, package.json, index.html, vite.config.js, or main.jsx.
 
 ### 2. Generate `mock-data.json`
 
@@ -276,100 +303,39 @@ Key rules regardless of mode:
 - If `mode: "named"`, replace generic HTML elements with the design system's components where a direct mapping exists
 - Record the resolved mode and any fallbacks in `spa-manifest.json` under `design_system_applied`
 
-### 7. Generate `package.json`
+### 7. Update `public/pipeline-manifest.json`
 
-**React:**
-```json
-{
-  "name": "<project_name_slug>",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.0",
-    "mermaid": "^11.0.0"
-  },
-  "devDependencies": {
-    "vite": "^5.4.0",
-    "@vitejs/plugin-react": "^4.3.1"
-  }
-}
-```
+`shell-scaffolder` already wrote `spa/public/pipeline-manifest.json` with all stages at `pending`. When you are done generating all view files and components, read the existing manifest, merge in the following fields, and write the file back. Never overwrite the full file from scratch — other agents will have already updated their stage statuses.
 
-**Vue:**
-```json
-{
-  "name": "<project_name_slug>",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "vue": "^3.5.0",
-    "vue-router": "^4.4.0",
-    "mermaid": "^11.0.0"
-  },
-  "devDependencies": {
-    "vite": "^5.4.0",
-    "@vitejs/plugin-vue": "^5.1.0"
-  }
-}
-```
-
-### 8. Generate Pipeline Shell
-
-The pipeline shell is a lightweight dev wrapper that sits outside the prototype's own styles and routing. It provides a persistent top bar with tabs to switch between the prototype and its byproducts. It must never interfere with the prototype's appearance or behaviour.
-
-#### Shell design
-
-- A fixed top bar: `[▶ Prototype] [~ Flow] [~ Journey] [⬡ Wireframe] [◎ Artifacts]`
-- Clicking a tab swaps the content area below the bar
-- **Prototype** tab shows the prototype in full — the router and all views run normally inside it
-- The shell top bar uses its own isolated CSS class namespace (`ppl-*`) and is scoped entirely to `shell.css` — it must not inherit from or override the prototype's styles
-- Shell background: `#1a1a2e` (dark navy), tab text: `#e2e8f0`, active tab accent: `#6366f1` (indigo)
-- Shell font: system UI stack, 13px — visually distinct from whatever the prototype uses
-
-#### `public/pipeline-manifest.json`
-
-Before generating the shell, write `spa/public/pipeline-manifest.json`. This file is served statically by Vite and read at runtime by the shell. It contains all byproduct content inlined so the shell works with zero additional fetch calls:
+Merge these fields into the existing manifest:
 
 ```json
 {
-  "project_name": "<project name from requirements.json>",
-  "run_id": "<run_id from pipeline.config.json>",
-  "framework": "react | vue",
-  "generated_at": "ISO8601",
   "screens": [
     { "screen_id": "string", "screen_name": "string", "route": "string" }
   ],
   "byproducts": {
     "flow": {
       "present": true,
-      "content": "<full text content of flow.mmd>"
+      "content": "<full text content of flow.excalidraw — the raw JSON string>"
     },
     "journey": {
       "present": true,
-      "content": "<full text content of journey.mmd>"
+      "content": "<full text content of journey.excalidraw — the raw JSON string>"
     },
     "lo_fi": {
       "present": false,
-      "excalidraw_url": "../lo-fi.excalidraw",
+      "content": null,
       "screen_count": 0
     }
   },
   "artifacts": [
-    { "name": "Flow Diagram", "file": "flow.mmd", "description": "Mermaid screen navigation flowchart" },
-    { "name": "User Journey", "file": "journey.mmd", "description": "Mermaid persona journey map" },
+    { "name": "Flow Diagram", "file": "flow.excalidraw", "description": "Excalidraw screen navigation flowchart" },
+    { "name": "Flow Viewer", "file": "flow.html", "description": "Standalone browser viewer for flow diagram" },
+    { "name": "User Journey", "file": "journey.excalidraw", "description": "Excalidraw persona journey map" },
+    { "name": "Journey Viewer", "file": "journey.html", "description": "Standalone browser viewer for journey map" },
     { "name": "Lo-fi Wireframe", "file": "lo-fi.excalidraw", "description": "Excalidraw grey-box wireframes", "present": false },
+    { "name": "Lo-fi Viewer", "file": "lo-fi.html", "description": "Self-contained browser viewer for wireframes", "present": false },
     { "name": "Screen Map", "file": "screen-map.json", "description": "Canonical screen inventory" },
     { "name": "Requirements", "file": "requirements.json", "description": "Structured product requirements" },
     { "name": "Validation Report", "file": "validation-report.json", "description": "Parity check results" }
@@ -377,56 +343,9 @@ Before generating the shell, write `spa/public/pipeline-manifest.json`. This fil
 }
 ```
 
-Read `flow.mmd` and `journey.mmd` from `output_dir` and embed their full text content into the `byproducts.flow.content` and `byproducts.journey.content` fields. If `lo_fi_enabled: true`, set `lo_fi.present: true` and `lo_fi.screen_count` from `lo-fi-index.json`.
+Read `flow.excalidraw` and `journey.excalidraw` from `output_dir` and embed their full text content (raw JSON strings) into `byproducts.flow.content` and `byproducts.journey.content`. If `lo_fi_enabled: true`, read `lo-fi.excalidraw` from `output_dir`, set `lo_fi.present: true`, embed the full JSON string into `lo_fi.content`, and set `lo_fi.screen_count` from `lo-fi-index.json`. All three content values are raw text of `.excalidraw` files — embed as JSON string values so the manifest remains valid JSON.
 
-#### `src/shell/PipelineShell` (React `.jsx` / Vue `.vue`)
-
-The shell component:
-
-1. On mount, `fetch('/pipeline-manifest.json')` and store in state
-2. Tracks `activeTab`: one of `prototype | flow | journey | wireframe | artifacts`
-3. Renders a fixed top bar with 5 tab buttons (hide `wireframe` tab if `lo_fi.present` is false)
-4. Renders the content area based on `activeTab`:
-   - `prototype` — renders `<div className="ppl-prototype-frame">` containing the framework's router outlet (`<RouterProvider>` / `<RouterView>`) — the prototype runs normally here
-   - `flow` — renders `<FlowTab content={manifest.byproducts.flow.content} />`
-   - `journey` — renders `<JourneyTab content={manifest.byproducts.journey.content} />`
-   - `wireframe` — renders `<WireframeTab loFi={manifest.byproducts.lo_fi} />`
-   - `artifacts` — renders `<ArtifactsTab artifacts={manifest.artifacts} screens={manifest.screens} />`
-
-The `ppl-prototype-frame` div must fill the remaining viewport below the shell bar and must not clip or constrain the prototype's own scrolling or layout.
-
-#### Tab components
-
-**`FlowTab`** and **`JourneyTab`**:
-- Accept a `content` prop (the raw Mermaid source string)
-- On mount, call `mermaid.render('diagram-id', content)` and inject the returned SVG into the DOM
-- Use `mermaid.initialize({ startOnLoad: false, theme: 'dark' })` once at module level
-- Display a "No diagram available" message if `content` is empty or null
-
-**`WireframeTab`**:
-- If `loFi.present` is false: show "No lo-fi wireframes were generated for this run."
-- If `loFi.present` is true: show the screen count, a note that the file is at `../lo-fi.excalidraw` relative to the run directory, and a button `<a href="../lo-fi.excalidraw" download>Download lo-fi.excalidraw</a>` — this works when the prototype is served via `npm run dev` from within `spa/`
-- Also show a tip: "Open at excalidraw.com to view the wireframes."
-
-**`ArtifactsTab`**:
-- List all entries from `manifest.artifacts`, showing name, file path, and description
-- Mark absent artifacts (those without `present: true` or where `present: false`) with a dimmed style
-- List all screens from `manifest.screens` in a table: screen name, route
-
-#### `src/styles/shell.css`
-
-All shell styles use the `ppl-` prefix. Key rules:
-- `.ppl-shell` — `position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: #1a1a2e; font-family: system-ui, sans-serif; font-size: 13px;`
-- `.ppl-tab-bar` — `display: flex; gap: 2px; padding: 6px 12px; border-bottom: 1px solid #2d2d4e;`
-- `.ppl-tab` — `padding: 5px 14px; border-radius: 4px; border: none; background: transparent; color: #94a3b8; cursor: pointer;`
-- `.ppl-tab.ppl-active` — `background: #6366f1; color: #fff;`
-- `.ppl-content` — `position: fixed; top: 37px; left: 0; right: 0; bottom: 0; overflow: auto;`
-- `.ppl-prototype-frame` — `width: 100%; height: 100%;`
-- `.ppl-mermaid` — `padding: 24px; background: #111827;` — contains the rendered SVG
-- `.ppl-artifacts-list` — `padding: 24px; color: #e2e8f0;`
-- `.ppl-artifact-absent` — `opacity: 0.4;`
-
-`shell.css` is imported only in `PipelineShell` — never in `App` or any prototype component.
+Then set `pipeline.prototype.status` to `"ready"` and `pipeline.prototype.updated_at` to the current ISO8601 timestamp in the same write.
 
 #### Wiring into `App` (React) / `App.vue` (Vue)
 
@@ -468,7 +387,7 @@ Write all files to `spa/` within `output_dir`. Write a manifest of all generated
     "output_dir": "/absolute/path",
     "total_views": 0,
     "total_components": 0,
-    "shell_generated": true,
+
     "design_system_applied": {
       "mode": "none | css | json_tokens | figma | tailwind | named | description",
       "source": "path or description or null",
@@ -481,9 +400,7 @@ Write all files to `spa/` within `output_dir`. Write a manifest of all generated
   "files": [
     { "path": "spa/src/views/HomeView.jsx", "type": "view", "screen_id": "home" },
     { "path": "spa/src/components/NavBar.jsx", "type": "component" },
-    { "path": "spa/src/data/mock-data.json", "type": "data" },
-    { "path": "spa/src/shell/PipelineShell.jsx", "type": "shell" },
-    { "path": "spa/public/pipeline-manifest.json", "type": "shell_data" }
+    { "path": "spa/src/data/mock-data.json", "type": "data" }
   ],
   "routes": [
     { "path": "/", "view": "HomeView", "screen_id": "home" }
@@ -498,9 +415,7 @@ Write all files to `spa/` within `output_dir`. Write a manifest of all generated
 - Every form field must have a `value` + `onChange` (React) or `v-model` (Vue) — no uncontrolled inputs
 - Every list render must handle the empty state case
 - All navigation must use the router — no `window.location` or `<a href>`
-- Shell CSS must use only `ppl-` prefixed classes — never bleed into prototype styles
-- The shell must not add padding-top or margin-top to the prototype frame — the 37px shell bar height is handled by `ppl-content` positioning
-- Write `public/pipeline-manifest.json` before generating shell components — the tab components depend on its shape
+- Update `pipeline-manifest.json` via read-merge-write — never overwrite the full file from scratch
 - Write `spa-manifest.json` before declaring completion
 - All reads and writes must be scoped to `working_dir`
 - Do not write files outside `spa/` within `working_dir` (except `spa-manifest.json`)

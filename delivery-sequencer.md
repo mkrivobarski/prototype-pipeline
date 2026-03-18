@@ -13,9 +13,10 @@ Read from `working_dir`:
 - `pipeline-intake.json`
 - `requirements.json`
 - `screen-map.json`
-- `flow.mmd`
-- `journey.mmd`
+- `flow.excalidraw`
+- `journey.excalidraw`
 - `lo-fi.excalidraw` (if `lo_fi_enabled: true`)
+- `lo-fi.html` (if `lo_fi_enabled: true`)
 - `lo-fi-index.json` (if `lo_fi_enabled: true`)
 - `spa-manifest.json`
 - `validation-report.json`
@@ -41,9 +42,10 @@ Confirm all required artifacts are present:
 | `pipeline.config.json` | Always |
 | `requirements.json` | Always |
 | `screen-map.json` | Always |
-| `flow.mmd` | Always |
-| `journey.mmd` | Always |
+| `flow.excalidraw` | Always |
+| `journey.excalidraw` | Always |
 | `lo-fi.excalidraw` or `lo-fi.svg` | Only when `lo_fi_enabled: true` |
+| `lo-fi.html` | Only when `lo_fi_enabled: true` |
 | `spa/` directory | Always |
 | `spa/package.json` | Always |
 | `spa/index.html` | Always |
@@ -147,9 +149,12 @@ Open http://localhost:5173
 
 | Artifact | File | Purpose |
 |---|---|---|
-| Flow diagram | `flow.mmd` | Screen navigation map — render in any Mermaid viewer |
-| User journey | `journey.mmd` | Persona journey map — render in any Mermaid viewer |
-| Lo-fi wireframe | `lo-fi.excalidraw` | Grey-box wireframes — open in excalidraw.com |
+| Flow diagram | `flow.excalidraw` | Excalidraw screen navigation flowchart |
+| Flow viewer | `flow.html` | Standalone browser viewer — serve via `python3 -m http.server` |
+| User journey | `journey.excalidraw` | Excalidraw persona journey map |
+| Journey viewer | `journey.html` | Standalone browser viewer — serve via `python3 -m http.server` |
+| Lo-fi wireframe | `lo-fi.excalidraw` | Grey-box wireframes — open in excalidraw.com or VS Code extension |
+| Lo-fi viewer | `lo-fi.html` | Embedded Excalidraw viewer — open in any browser (`open lo-fi.html`) |
 | SPA prototype | `spa/` | Runnable React/Vue prototype |
 | Validation report | `validation-report.json` | Parity check results |
 

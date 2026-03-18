@@ -176,7 +176,7 @@ After writing the Excalidraw JSON, also write `flow.html` — a self-contained H
 </html>
 ```
 
-Replace `__EXCALIDRAW_JSON__` with the actual JSON content of `flow.excalidraw`. Must be served via HTTP (`python3 -m http.server`) — does not work as `file://`.
+After writing `flow.html`, also copy it to `spa/public/flow.html` (relative to `output_dir`) so Vite serves it at the same origin as the shell. This enables the `<iframe src="/flow.html">` in the shell's FlowTab to load correctly.
 
 After writing the Excalidraw JSON, write `flow-index.json`. Schema: see `SCHEMAS.md` → `flow-index.json`.
 

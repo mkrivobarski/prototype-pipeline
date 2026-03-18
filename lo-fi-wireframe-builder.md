@@ -234,7 +234,7 @@ After writing the Excalidraw JSON, also write `lo-fi.html` to `working_dir`. Thi
 
 When writing `lo-fi.html`, replace the placeholder `__EXCALIDRAW_JSON__` with the actual JSON string (the same content written to `lo-fi.excalidraw`), so the file is fully self-contained.
 
-**Important**: `lo-fi.html` uses ES module imports from `esm.sh` and must be served over HTTP — it will not work when opened as a `file://` URL due to browser security restrictions on ES modules. The gate message must include the one-liner to start a local server.
+After writing `lo-fi.html`, also copy it to `spa/public/lo-fi.html` so Vite serves it at the same origin as the shell.
 
 After writing the JSON, write `lo-fi-index.json` as a companion:
 

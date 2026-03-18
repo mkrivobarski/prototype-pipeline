@@ -167,7 +167,7 @@ Write `journey.excalidraw` to `working_dir`.
 
 ### Embedded Viewer — `journey.html`
 
-After writing the Excalidraw JSON, also write `journey.html` using the same pattern as `flow.html` and `lo-fi.html` — replace `__EXCALIDRAW_JSON__` with the actual JSON content. Title: "Journey Map". Must be served via HTTP.
+After writing `journey.html`, also copy it to `spa/public/journey.html` so Vite serves it at the same origin as the shell.
 
 After writing the Excalidraw JSON, write `journey-index.json`. Schema: see `SCHEMAS.md` → `journey-index.json`.
 

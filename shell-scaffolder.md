@@ -119,7 +119,28 @@ Add to `shell.css`:
 .ppl-stage-in_progress .ppl-dot { display: inline-block; animation: ppl-pulse 1.2s infinite; }
 ```
 
-## `App.jsx` — conditional routing
+## Excalidraw tabs — iframe approach
+
+`@excalidraw/excalidraw` v0.18 does not bundle cleanly in Vite (transitive `open-color` JSON import incompatibility). Do NOT import Excalidraw directly in the tab components.
+
+Instead, render `<iframe>` pointing at the standalone HTML viewers which load Excalidraw from esm.sh:
+
+```jsx
+// FlowTab.jsx
+export default function FlowTab({ present }) {
+  if (!present) return <div className="ppl-tab-empty">Flow diagram not ready yet.</div>
+  return <iframe src="/flow.html" style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} title="Flow Diagram" />
+}
+
+// JourneyTab.jsx — same pattern, src="/journey.html"
+// WireframeTab.jsx — same pattern, src="/lo-fi.html"
+```
+
+The standalone HTML files (`flow.html`, `journey.html`, `lo-fi.html`) are written by `flow-diagram-builder`, `journey-diagram-builder`, and `lo-fi-wireframe-builder` into `working_dir`. After each agent writes its HTML file, **also copy it into `spa/public/`** so Vite serves it at the same origin as the shell.
+
+Because the tabs use `<iframe>` not Excalidraw imports, **remove `@excalidraw/excalidraw` from `package.json`** — it is not needed.
+
+The `present` prop is sufficient — do not pass `content` to diagram tabs.
 
 Before downstream agents write view files, the router only has one route (`*` → `LoadingView`). The spa-generator will overwrite `App.jsx` and `router.jsx` with real routes when it runs.
 
@@ -150,7 +171,7 @@ Resolve design system from `pipeline.config.json` and include the correct packag
 | `tailwind` | dev: `"tailwindcss": "^3", "autoprefixer": "^10", "postcss": "^8"` |
 | none / description / css / json_tokens | no extra deps |
 
-Always include `"@excalidraw/excalidraw": "^0.18.0"` in all cases.
+Do **not** include `@excalidraw/excalidraw` — Excalidraw loads via esm.sh inside the standalone iframe HTML files, not via npm.
 
 ## `npm install` and dev server
 

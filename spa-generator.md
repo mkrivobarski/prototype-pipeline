@@ -308,8 +308,7 @@ Read the existing manifest, merge in the following fields only, and write it bac
     { "screen_id": "string", "screen_name": "string", "route": "string" }
   ],
   "artifacts": [
-    { "name": "Flow Diagram",      "file": "flow.excalidraw",    "description": "Excalidraw screen navigation flowchart",   "present": true },
-    { "name": "Flow Viewer",       "file": "flow.html",          "description": "Standalone browser viewer for flow diagram", "present": true },
+    { "name": "Flow Diagram",      "file": "flow.excalidraw",    "description": "Excalidraw screen navigation flowchart — open in excalidraw.com or VS Code", "present": true },
     { "name": "User Journey",      "file": "journey.excalidraw", "description": "Excalidraw persona journey map",             "present": true },
     { "name": "Journey Viewer",    "file": "journey.html",       "description": "Standalone browser viewer for journey map",  "present": true },
     { "name": "Lo-fi Wireframe",   "file": "lo-fi.excalidraw",   "description": "Excalidraw grey-box wireframes",             "present": false },

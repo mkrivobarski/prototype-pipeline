@@ -103,7 +103,7 @@ After writing `requirements.json`, update the manifest again:
   "screen_count": 3,
   "persona_count": 2,
   "flow_count": 1,
-  "screens": [{ "screen_id": "string", "screen_name": "string", "priority": "p0" }],
+  "screens": [{ "screen_id": "string", "screen_name": "string", "priority": "p0", "description": "string" }],
   "personas": [{ "id": "string", "name": "string" }],
   "flows": [{ "flow_id": "string", "flow_name": "string" }],
   "constraints": [{ "type": "string", "value": "string" }],

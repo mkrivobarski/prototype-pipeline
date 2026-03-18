@@ -31,7 +31,7 @@ Written by `shell-scaffolder`. Updated incrementally by every downstream agent v
       "screen_count": 0,
       "persona_count": 0,
       "flow_count": 0,
-      "screens": [{ "screen_id": "string", "screen_name": "string", "priority": "p0 | p1 | p2" }],
+      "screens": [{ "screen_id": "string", "screen_name": "string", "priority": "p0 | p1 | p2", "description": "string" }],
       "personas": [{ "id": "string", "name": "string" }],
       "flows": [{ "flow_id": "string", "flow_name": "string" }],
       "constraints": [{ "type": "string", "value": "string" }],

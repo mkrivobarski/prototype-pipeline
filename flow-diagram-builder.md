@@ -132,53 +132,9 @@ Produce **one canvas** containing all screens and all happy-path edges. Do not p
 
 Write `flow.excalidraw` to `working_dir` with the full Excalidraw JSON.
 
-### Embedded Viewer — `flow.html`
-
-After writing the Excalidraw JSON, also write `flow.html` — a self-contained HTML file using the same pattern as `lo-fi.html`:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flow Diagram</title>
-  <link rel="stylesheet" href="https://esm.sh/@excalidraw/excalidraw@0.18.0/dist/prod/index.css" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: #0f172a; font-family: system-ui, sans-serif; }
-    #root { height: 100vh; }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module">
-    import React from 'https://esm.sh/react@18.3.1';
-    import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
-    import { Excalidraw } from 'https://esm.sh/@excalidraw/excalidraw@0.18.0?deps=react@18.3.1,react-dom@18.3.1';
-
-    const EXCALIDRAW_DATA = __EXCALIDRAW_JSON__;
-
-    const App = () => React.createElement(Excalidraw, {
-      initialData: {
-        elements: EXCALIDRAW_DATA.elements,
-        appState: { ...EXCALIDRAW_DATA.appState, viewModeEnabled: false },
-        files: EXCALIDRAW_DATA.files || {}
-      },
-      UIOptions: {
-        canvasActions: { export: false, saveAsImage: true, loadScene: false, saveToActiveFile: false }
-      }
-    });
-
-    createRoot(document.getElementById('root')).render(React.createElement(App));
-  </script>
-</body>
-</html>
-```
-
-After writing `flow.html`, also copy it to `spa/public/flow.html` (relative to `output_dir`) so Vite serves it at the same origin as the shell. This enables the `<iframe src="/flow.html">` in the shell's FlowTab to load correctly.
-
 After writing the Excalidraw JSON, write `flow-index.json`. Schema: see `SCHEMAS.md` → `flow-index.json`.
+
+> **Note**: `flow.html` is no longer produced — the Flow tab has been removed from the pipeline shell. The `.excalidraw` file remains as a deliverable artifact (openable in excalidraw.com or VS Code).
 
 ## Manifest Update
 
@@ -188,18 +144,17 @@ After writing the Excalidraw JSON, write `flow-index.json`. Schema: see `SCHEMAS
 >
 > Do not read the manifest at the start of your run to set `in_progress` — skip the `in_progress` update entirely. Only write once: the final `ready` state after all files are written.
 
-After writing `flow.excalidraw`, `flow.html`, and `flow-index.json`, update the manifest:
+After writing `flow.excalidraw` and `flow-index.json`, update the manifest:
 1. Set `pipeline.flow.status` to `"ready"` and `pipeline.flow.updated_at` to the current ISO8601 timestamp.
-2. Set `byproducts.flow.present` to `true`.
 
 Read, merge, write back. Never overwrite the full manifest.
 
-If `spa/public/pipeline-manifest.json` does not yet exist, skip both updates.
+If `spa/public/pipeline-manifest.json` does not yet exist, skip the update.
 
 ## Rules
 - Every screen in `screen-map.json` must have a node
 - Only happy-path edges are drawn
 - The Excalidraw JSON must be valid (no undefined fields, valid element types)
 - Use dark theme (`viewBackgroundColor: "#0f172a"`) to visually distinguish from lo-fi wireframes
-- Write `flow.excalidraw`, `flow.html`, and `flow-index.json` before declaring completion
+- Write `flow.excalidraw` and `flow-index.json` before declaring completion
 - All reads and writes must be scoped to `working_dir`

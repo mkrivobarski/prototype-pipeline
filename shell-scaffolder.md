@@ -20,7 +20,7 @@ A fully bootable `spa/` directory with:
 4. `spa/src/main.jsx` (or `.js` for Vue)
 5. `spa/src/App.jsx` (or `App.vue`)
 6. `spa/src/shell/PipelineShell.jsx` (or `.vue`) — polls `/pipeline-manifest.json` every 2s
-7. `spa/src/shell/tabs/` — `FlowTab`, `JourneyTab`, `WireframeTab`, `RequirementsTab`, `ArtifactsTab`
+7. `spa/src/shell/tabs/` — `JourneyTab`, `WireframeTab`, `RequirementsTab`, `ArtifactsTab`
 8. `spa/src/styles/shell.css`
 9. `spa/src/styles/index.css`
 10. `spa/src/views/LoadingView.jsx` — shown in the Prototype tab until SPA views are ready
@@ -41,7 +41,6 @@ This file is written now and updated by every downstream agent. The shell polls 
   "pipeline": {
     "requirements":  { "status": "pending",    "updated_at": null },
     "screen_map":    { "status": "pending",    "updated_at": null },
-    "flow":          { "status": "pending",    "updated_at": null },
     "journey":       { "status": "pending",    "updated_at": null },
     "lo_fi":         { "status": "not_applicable", "updated_at": null },
     "prototype":     { "status": "pending",    "updated_at": null }
@@ -49,7 +48,6 @@ This file is written now and updated by every downstream agent. The shell polls 
   "screens": [],
   "byproducts": {
     "requirements": null,
-    "flow":    { "present": false },
     "journey": { "present": false },
     "lo_fi":   { "present": false, "screen_count": 0 }
   },
@@ -73,8 +71,8 @@ Set `lo_fi.status` to `"not_applicable"` if `lo_fi_enabled: false` in `pipeline.
 4. Hide the status bar entirely once all stages are `ready` / `not_applicable`
 5. When `pipeline.prototype.status` is `pending` or `in_progress`, show `<LoadingView />` in the Prototype tab
 6. When `pipeline.prototype.status` is `ready`, show the real prototype router content
-7. Tab order: `▶ Prototype` | `≡ Requirements` | `~ Flow` | `~ Journey` | `⬡ Wireframe` (only if lo_fi present) | `◎ Artifacts`
-8. The Requirements tab renders `manifest.byproducts.requirements` — a summary object (not the full `requirements.json`). Show "Requirements not ready yet." if null. Display: product name, screen count, persona/flow counts, a screen table with priority badges, and any analyst notes.
+7. Tab order: `▶ Prototype` | `≡ Requirements` | `~ Journey` | `⬡ Wireframe` (only if lo_fi present) | `◎ Artifacts`
+8. The Requirements tab renders `manifest.byproducts.requirements` — a summary object (not the full `requirements.json`). Show "Requirements not ready yet." if null. Display: product name, screen count, persona/flow counts, a screen table with priority badges and description column, and any analyst notes.
 
 ## `LoadingView`
 
@@ -126,17 +124,16 @@ Add to `shell.css`:
 Instead, render `<iframe>` pointing at the standalone HTML viewers which load Excalidraw from esm.sh:
 
 ```jsx
-// FlowTab.jsx
-export default function FlowTab({ present }) {
-  if (!present) return <div className="ppl-tab-empty">Flow diagram not ready yet.</div>
-  return <iframe src="/flow.html" style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} title="Flow Diagram" />
+// JourneyTab.jsx
+export default function JourneyTab({ present }) {
+  if (!present) return <div className="ppl-tab-empty">Journey map not ready yet.</div>
+  return <iframe src="/journey.html" style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} title="User Journey" />
 }
 
-// JourneyTab.jsx — same pattern, src="/journey.html"
 // WireframeTab.jsx — same pattern, src="/lo-fi.html"
 ```
 
-The standalone HTML files (`flow.html`, `journey.html`, `lo-fi.html`) are written by `flow-diagram-builder`, `journey-diagram-builder`, and `lo-fi-wireframe-builder` into `working_dir`. After each agent writes its HTML file, **also copy it into `spa/public/`** so Vite serves it at the same origin as the shell.
+The standalone HTML files (`journey.html`, `lo-fi.html`) are written by `journey-diagram-builder` and `lo-fi-wireframe-builder` into `working_dir`. After each agent writes its HTML file, **also copy it into `spa/public/`** so Vite serves it at the same origin as the shell.
 
 Because the tabs use `<iframe>` not Excalidraw imports, **remove `@excalidraw/excalidraw` from `package.json`** — it is not needed.
 
@@ -189,12 +186,9 @@ cd <output_dir>/spa && npm run dev &
 ```
 Wait up to 5 seconds for the server to print its local URL, then capture the port it chose (Vite auto-increments if 5173 is taken).
 
-3. Print the URL immediately so the user can open it:
+3. Print the URL and then stop — do not log further progress or status updates:
 ```
 Shell live at: http://localhost:<port>
-
-Open this URL now — the prototype shell is running.
-The status bar will show pipeline progress in real time as each stage completes.
 ```
 
 ## Output

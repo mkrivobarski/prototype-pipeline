@@ -113,8 +113,7 @@ Open http://localhost:5173
 
 | Artifact | File | Purpose |
 |---|---|---|
-| Flow diagram | `flow.excalidraw` | Excalidraw screen navigation flowchart |
-| Flow viewer | `flow.html` | Standalone browser viewer — serve via `python3 -m http.server` |
+| Flow diagram | `flow.excalidraw` | Excalidraw screen navigation flowchart — open in excalidraw.com or VS Code |
 | User journey | `journey.excalidraw` | Excalidraw persona journey map |
 | Journey viewer | `journey.html` | Standalone browser viewer — serve via `python3 -m http.server` |
 | Lo-fi wireframe | `lo-fi.excalidraw` | Grey-box wireframes — open in excalidraw.com or VS Code extension |

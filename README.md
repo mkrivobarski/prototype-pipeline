@@ -97,7 +97,8 @@ No backend required. No human code. Configurable byproduct outputs.
 ### SPA output
 - React or Vue (configured per run)
 - No backend — all state is simulated via local state + mock data
-- Token-styled only when design tokens are present as input
+- Token-styled when design tokens are present as input (7 design system modes)
+- Includes a **Pipeline Shell** — a fixed top bar with tabs to switch between the prototype and its byproducts (Flow, Journey, Wireframe, Artifacts) without leaving the browser
 - All outputs written to `spa/` within the run directory
 
 ---
@@ -184,12 +185,19 @@ Intake agent extracts screen structure from the Figma file.
     "seed_path": "absolute path to .yaml seed (optional)"
   },
   "output": {
+    "output_dir": "/absolute/path/to/output (defaults to working_dir/<slug>-YYYYMMDD/)",
     "framework": "react | vue",
     "lo_fi_enabled": false,
     "lo_fi_gate": true
   },
-  "design_tokens": {
-    "token_file_path": "relative to working_dir (optional)"
+  "design_system": {
+    "mode": "none | css | json_tokens | figma | tailwind | named | description",
+    "css_path": "path to .css file with custom properties (optional)",
+    "json_tokens_path": "path to Style Dictionary / W3C / Figma tokens JSON (optional)",
+    "figma_file_url": "Figma URL for token extraction via MCP (optional)",
+    "tailwind_config_path": "path to tailwind.config.* (optional)",
+    "named_system": "shadcn | antd | mui | chakra (optional)",
+    "description": "plain-text styling intent, e.g. 'dark theme, Inter font, purple primary' (optional)"
   }
 }
 ```
@@ -207,21 +215,38 @@ runs/
     screen-map.json
     flow.mmd
     journey.mmd
-    lo-fi.excalidraw         (optional)
-    lo-fi.svg                (optional fallback)
+    lo-fi.excalidraw         (optional — when lo_fi_enabled: true)
+    lo-fi-index.json         (optional — when lo_fi_enabled: true)
+    spa-manifest.json
+    iteration-plan.json      (optional — written on first proto:iterate)
     validation-report.json
     delivery-package.json
     PROTOTYPE.md
     spa/
       index.html
+      vite.config.js
+      package.json
+      public/
+        pipeline-manifest.json   (byproduct content for the shell)
       src/
         App.{jsx|vue}
-        main.{js|ts}
-        routes/
-        components/
+        main.{jsx|js}
+        router.{jsx|js}
+        shell/
+          PipelineShell.{jsx|vue}
+          tabs/
+            FlowTab.{jsx|vue}
+            JourneyTab.{jsx|vue}
+            WireframeTab.{jsx|vue}
+            ArtifactsTab.{jsx|vue}
         views/
+          <ScreenName>View.{jsx|vue}
+        components/
+          <ComponentName>.{jsx|vue}
         data/
           mock-data.json
         styles/
-          tokens.css          (only if tokens provided)
+          index.css
+          shell.css
+          tokens.css           (optional — when design system provided)
 ```

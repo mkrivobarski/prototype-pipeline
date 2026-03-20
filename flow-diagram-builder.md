@@ -151,6 +151,18 @@ Read, merge, write back. Never overwrite the full manifest.
 
 If `spa/public/pipeline-manifest.json` does not yet exist, skip the update.
 
+## Creativity Mode
+
+Read `creativity_mode` from `pipeline.config.json`. If `stage_overrides["flow-diagram-builder"]` is set, use that value instead.
+
+| Mode | Behaviour |
+|------|-----------|
+| `structured` | Render only the happy-path edges explicitly listed in `screen-map.json`. Use the minimum viable node set. No back-edges, no section labels beyond what the flow data provides. |
+| `balanced` (default) | Render all happy-path edges plus section labels per flow row. Use design judgment for node colour emphasis (e.g. highlight the entry point distinctly). |
+| `exploratory` | In addition to the standard canvas, add an `alternative_paths` layer: draw back-edges and non-happy-path edges in a distinct colour (`strokeColor: "#f59e0b"`, `strokeStyle: "dashed"`), with a legend at the bottom of the canvas explaining the two edge types. |
+
+Default to `balanced` if `creativity_mode` is absent or unrecognised.
+
 ## Rules
 - Every screen in `screen-map.json` must have a node
 - Only happy-path edges are drawn

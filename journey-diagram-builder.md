@@ -167,6 +167,50 @@ Write `journey.excalidraw` to `working_dir`.
 
 ### Embedded Viewer — `journey.html`
 
+After writing the Excalidraw JSON, write `journey.html` to `working_dir`. This is a self-contained HTML file that renders the journey map in an embedded Excalidraw window — no login, no extension, no external upload required.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Journey</title>
+  <link rel="stylesheet" href="https://esm.sh/@excalidraw/excalidraw@0.18.0/dist/prod/index.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #0f172a; font-family: system-ui, sans-serif; }
+    #root { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module">
+    import React from 'https://esm.sh/react@18.3.1';
+    import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
+    import { Excalidraw } from 'https://esm.sh/@excalidraw/excalidraw@0.18.0?deps=react@18.3.1,react-dom@18.3.1';
+
+    const EXCALIDRAW_DATA = __EXCALIDRAW_JSON__;
+
+    const App = () => React.createElement(Excalidraw, {
+      initialData: {
+        elements: EXCALIDRAW_DATA.elements,
+        appState: { ...EXCALIDRAW_DATA.appState, viewModeEnabled: false },
+        files: EXCALIDRAW_DATA.files || {}
+      },
+      UIOptions: {
+        canvasActions: { export: false, saveAsImage: true, loadScene: false, saveToActiveFile: false }
+      }
+    });
+
+    createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
+</body>
+</html>
+```
+
+Replace `__EXCALIDRAW_JSON__` with the actual JSON string (the same content written to `journey.excalidraw`), so the file is fully self-contained.
+
 After writing `journey.html`, also copy it to `spa/public/journey.html` so Vite serves it at the same origin as the shell.
 
 After writing the Excalidraw JSON, write `journey-index.json`. Schema: see `SCHEMAS.md` → `journey-index.json`.

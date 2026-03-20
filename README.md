@@ -73,8 +73,8 @@ No backend required. No human code. Configurable byproduct outputs.
 | `pipeline-intake-agent` | Brief / Figma URL / Seed path | `pipeline.config.json`, `pipeline-intake.json` |
 | `requirements-analyst` | `pipeline.config.json` + input source | `requirements.json` |
 | `screen-mapper` | `requirements.json` | `screen-map.json` |
-| `flow-diagram-builder` | `screen-map.json`, `requirements.json` | `flow.mmd` |
-| `journey-diagram-builder` | `requirements.json`, `screen-map.json` | `journey.mmd` |
+| `flow-diagram-builder` | `screen-map.json` | `flow.excalidraw`, `flow-index.json` |
+| `journey-diagram-builder` | `requirements.json`, `screen-map.json` | `journey.excalidraw`, `journey.html`, `journey-index.json` |
 | `lo-fi-wireframe-builder` | `screen-map.json`, `flow.mmd` | `lo-fi.excalidraw` (+ `lo-fi.svg` fallback) |
 | `spa-generator` | `screen-map.json`, `requirements.json`, (`lo-fi.excalidraw`) | `spa/` file tree |
 | `prototype-validator` | `spa/` | `validation-report.json` |
@@ -86,8 +86,8 @@ No backend required. No human code. Configurable byproduct outputs.
 ## Stage Flow Detail
 
 ### Always-on byproducts
-- **Flow diagram** (`flow.mmd`) — Mermaid flowchart of screen navigation
-- **User journey** (`journey.mmd`) — Mermaid journey diagram per persona
+- **Flow diagram** (`flow.excalidraw`) — Excalidraw flowchart of screen navigation (open in excalidraw.com or VS Code)
+- **User journey** (`journey.excalidraw`) — Excalidraw journey map per persona; `journey.html` is a self-contained browser viewer
 
 ### Optional byproduct
 - **Lo-fi wireframe** (`lo-fi.excalidraw`) — Excalidraw JSON layout per screen
@@ -213,8 +213,11 @@ runs/
     pipeline-intake.json
     requirements.json
     screen-map.json
-    flow.mmd
-    journey.mmd
+    flow.excalidraw
+    flow-index.json
+    journey.excalidraw
+    journey.html
+    journey-index.json
     lo-fi.excalidraw         (optional — when lo_fi_enabled: true)
     lo-fi-index.json         (optional — when lo_fi_enabled: true)
     spa-manifest.json

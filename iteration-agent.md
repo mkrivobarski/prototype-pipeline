@@ -55,7 +55,7 @@ Before making any changes, write `iteration-plan.json` to `output_dir`:
   "change_description": "<verbatim user input>",
   "change_types": ["new_screen", "navigation"],
   "stages_to_rerun": ["screen-mapper", "flow-diagram-builder", "journey-diagram-builder", "spa-generator"],
-  "artifacts_to_update": ["screen-map.json", "flow.mmd", "journey.mmd", "spa/src/views/...", "spa/src/router.jsx"],
+  "artifacts_to_update": ["screen-map.json", "flow.excalidraw", "journey.excalidraw", "spa/src/views/...", "spa/src/router.jsx"],
   "artifacts_preserved": ["requirements.json", "pipeline.config.json", "pipeline-intake.json"]
 }
 ```
@@ -145,9 +145,9 @@ Changed:
   ~ NavBarView.jsx (notifications icon added)
   ~ mock-data.json (notifications entity added)
   ~ screen-map.json (new screen + navigation edges)
-  ~ flow.mmd (updated)
+  ~ flow.excalidraw (updated)
 
-Unchanged: requirements.json, journey.mmd, all other views
+Unchanged: requirements.json, journey.excalidraw, all other views
 
 Run: cd <output_dir>/spa && npm run dev
 ```

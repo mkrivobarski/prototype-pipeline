@@ -10,7 +10,9 @@ The screen map is the pivot point of the pipeline. The flow diagram, user journe
 
 ## Input
 
-Read from `working_dir`:
+Read `pipeline.config.json` from `working_dir` to get `output.output_dir`. All file reads and writes for this run use `output_dir`.
+
+Read from `output_dir`:
 - `requirements.json` — screen inventory, flows, personas, constraints
 
 ## Your Responsibilities
@@ -60,15 +62,15 @@ For each slot, suggest a likely React/Vue component type:
 
 ## Output Format
 
-Write `screen-map.json` to `working_dir`. Schema: see `SCHEMAS.md` → `screen-map.json`.
+Write `screen-map.json` to `output_dir`. Schema: see `SCHEMAS.md` → `screen-map.json`.
 
 ## Manifest Update
 
-Before starting work, update `spa/public/pipeline-manifest.json`: set `pipeline.screen_map.status` to `"in_progress"` and `pipeline.screen_map.updated_at` to the current ISO8601 timestamp. Read, merge, write back.
+Before starting work, update `output_dir/spa/public/pipeline-manifest.json`: set `pipeline.screen_map.status` to `"in_progress"` and `pipeline.screen_map.updated_at` to the current ISO8601 timestamp. Read, merge, write back.
 
 After writing `screen-map.json`, update the manifest again: set `pipeline.screen_map.status` to `"ready"`. Read, merge, write back. Never overwrite the full manifest.
 
-If `spa/public/pipeline-manifest.json` does not yet exist, skip both updates.
+If `output_dir/spa/public/pipeline-manifest.json` does not yet exist, skip both updates.
 
 ## Creativity Mode
 
@@ -90,4 +92,4 @@ Default to `balanced` if `creativity_mode` is absent or unrecognised.
 - Every `content` zone must have at least one slot
 - `mock_data` is required for any screen that displays a list or entity — derive shape from `mock_data_needed` in requirements
 - Write `screen-map.json` before declaring completion
-- All reads and writes must be scoped to `working_dir`
+- Read `pipeline.config.json` from `working_dir`; read all other inputs and write all outputs to `output_dir`

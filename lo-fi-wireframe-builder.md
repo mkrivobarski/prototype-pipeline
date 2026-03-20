@@ -13,7 +13,7 @@ This agent only runs when `output.lo_fi_enabled: true` in `pipeline.config.json`
 Read from `working_dir`:
 - `pipeline.config.json` — confirm `lo_fi_enabled: true` before proceeding
 - `screen-map.json` — screens, layout zones, slots, navigation edges
-- `flow.mmd` — used to understand screen adjacency (informational, not parsed)
+- `flow-index.json` — used to understand screen adjacency (informational)
 
 ## Excalidraw JSON Format
 

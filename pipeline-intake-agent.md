@@ -79,7 +79,15 @@ If not already set in `pipeline.config.json`, confirm — ask all at once as a s
 
 3. **Lo-fi wireframes** — generate Excalidraw wireframes before SPA, or skip straight to SPA
 
-4. **Design system / styling input** — ask: "Do you have a design system or styling input to apply to the prototype?"
+4. **Creativity level** — ask: "How much creative latitude should agents apply when generating requirements, screens, and UI? Choose a level:"
+   - `structured` — schema-strict, one output per stage, no elaboration beyond what is stated
+   - `balanced` (default) — follow the schema, use creative judgment on ambiguous details
+   - `exploratory` — generate divergent ideas; for ideation stages, produce 2–3 variations
+   - Record the answer as `creativity_mode` in `pipeline.config.json`.
+   - If the user skips or says "default", use `balanced`.
+   - Optionally, ask if any specific stage should differ (e.g. "strict on requirements, exploratory on wireframes"). Record per-stage overrides in `stage_overrides`.
+
+5. **Design system / styling input** — ask: "Do you have a design system or styling input to apply to the prototype?"
    - Accepted forms (user can provide one or more):
      - CSS file with custom properties (e.g. `tokens.css`, `variables.css`)
      - JSON token file (e.g. Style Dictionary output, Figma tokens export, `tokens.json`)
@@ -123,6 +131,10 @@ Write the resolved config (overwrite if it already existed with incomplete value
     "tailwind_config_path": "absolute or relative path to tailwind.config.*, or null",
     "named_system": "shadcn | antd | mui | chakra | fiori | or null",
     "description": "plain text description of styling intent, or null"
+  },
+  "creativity_mode": "structured | balanced | exploratory",
+  "stage_overrides": {
+    "<agent-name>": "structured | balanced | exploratory"
   }
 }
 ```
@@ -141,6 +153,7 @@ Write the run initialisation record:
   "framework": "react | vue",
   "design_system_mode": "none | css | json_tokens | figma | tailwind | named | description",
   "tokens_provided": false,
+  "creativity_mode": "structured | balanced | exploratory",
   "intake_notes": [
     "All agents must read and write only within: <output_dir>",
     "Design system: <mode> — <summary of what was provided>"
@@ -153,6 +166,7 @@ Write the run initialisation record:
 - In seed mode, never re-interview on fields the seed already resolves
 - In combined mode, seed fields always win over brief text
 - Always ask the design system question — never assume no tokens are available without asking
+- Always ask the creativity level question — default to `balanced` if the user skips
 - `output_dir` must be an absolute path — resolve relative paths before writing
 - Create `output_dir` if it does not exist before writing any artifacts
 - All downstream agents write artifacts to `output_dir`, not `working_dir` (unless they are the same)

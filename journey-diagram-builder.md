@@ -187,7 +187,19 @@ Read, merge, write back. Never overwrite the full manifest.
 
 If `spa/public/pipeline-manifest.json` does not yet exist, skip both updates.
 
-## Rules
+## Creativity Mode
+
+Read `creativity_mode` from `pipeline.config.json`. If `stage_overrides["journey-diagram-builder"]` is set, use that value instead.
+
+| Mode | Behaviour |
+|------|-----------|
+| `structured` | Map only the steps explicitly implied by the screen flows. Assign satisfaction scores based on the screen's stated complexity — do not embellish. Keep insight notes factual and brief. |
+| `balanced` (default) | Add standard pre- and post-product steps. Use design intuition for satisfaction scoring. Write insight notes that identify friction patterns and suggest improvements. |
+| `exploratory` | Add a second persona band per persona showing an "aspirational" journey (as if friction points were resolved). Add an "opportunity" annotation layer: coloured callout boxes above the lowest-scoring steps describing specific design improvements. |
+
+Default to `balanced` if `creativity_mode` is absent or unrecognised.
+
+
 - Every persona in `requirements.json` must have a band
 - Every step in a persona's journey must have a cell and score bar
 - Satisfaction scores must be integers 1–5

@@ -70,7 +70,19 @@ After writing `screen-map.json`, update the manifest again: set `pipeline.screen
 
 If `spa/public/pipeline-manifest.json` does not yet exist, skip both updates.
 
-## Rules
+## Creativity Mode
+
+Read `creativity_mode` from `pipeline.config.json`. If `stage_overrides["screen-mapper"]` is set, use that value instead.
+
+| Mode | Behaviour |
+|------|-----------|
+| `structured` | Map only the screens and slots explicitly listed in `requirements.json`. Do not add slots not described or implied. Use the minimum viable slot set per zone. |
+| `balanced` (default) | Map all required screens; add slots that are standard UX convention for the screen type (e.g. a search field on a list screen, a fab on a dashboard). Use your design judgment for layout density. |
+| `exploratory` | For each screen, generate an additional `layout_variants` array in the screen entry with 2 alternative slot arrangements. Label each variant (e.g. `"card-first"`, `"list-first"`). The primary `slots` array remains the default; variants are advisory for the SPA generator. |
+
+Default to `balanced` if `creativity_mode` is absent or unrecognised.
+
+
 - Every screen in `requirements.json` must appear in `screen-map.json`
 - The entry screen is the first `p0` screen in the primary flow
 - Assign routes: entry screen gets `/`, all others get `/<screen_id>` (replace underscores with hyphens)

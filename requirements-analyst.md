@@ -115,7 +115,19 @@ Read, merge, write back. Never overwrite the full manifest.
 
 If `spa/public/pipeline-manifest.json` does not yet exist (shell-scaffolder hasn't run yet), skip both updates.
 
-## Rules
+## Creativity Mode
+
+Read `creativity_mode` from `pipeline.config.json`. If `stage_overrides["requirements-analyst"]` is set, use that value instead.
+
+| Mode | Behaviour |
+|------|-----------|
+| `structured` | Extract only what is explicitly stated. Do not infer screens or personas beyond direct evidence. Annotate every inferred item with `source: "inferred"` and a low-confidence flag. |
+| `balanced` (default) | Extract what is stated and infer what is strongly implied. Use creative judgment to fill in common-sense gaps (e.g. an "Edit" screen implied by a "View" screen). |
+| `exploratory` | After producing the primary `requirements.json`, append an `analyst_notes` section listing 2–3 alternative interpretations of the brief — alternative user personas, additional screens that would strengthen the product, or flow variations. Mark these clearly as `speculative`. |
+
+Default to `balanced` if `creativity_mode` is absent or unrecognised.
+
+
 - Every screen mentioned or strongly implied in the input must appear in `screens[]`
 - Never invent screens not present or implied in the input
 - Seed constraints must be recorded with `source: "seed"` — never mark them as `"inferred"`

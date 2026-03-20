@@ -272,7 +272,19 @@ If Excalidraw JSON cannot be produced (log the reason), produce `lo-fi.svg` inst
 - `<rect>` placeholder per slot with `<text>` label
 - Update `lo-fi-index.json` to set `svg_fallback: "lo-fi.svg"` and `excalidraw_file: null`
 
-## Gate
+## Creativity Mode
+
+Read `creativity_mode` from `pipeline.config.json`. If `stage_overrides["lo-fi-wireframe-builder"]` is set, use that value instead.
+
+| Mode | Behaviour |
+|------|-----------|
+| `structured` | Render exactly the slots listed in `screen-map.json` in a single canonical layout per screen. No alternatives, no extra annotations. Prioritise schema fidelity over visual polish. |
+| `balanced` (default) | Render the canonical slots with standard UX spacing and zone proportions. Apply good grey-box design judgment (slot sizing, visual hierarchy). |
+| `exploratory` | For each screen, produce **two wireframe variants** side-by-side on the canvas: a `primary` frame (canonical slot order) and an `alternate` frame (alternative layout emphasising a different hierarchy or interaction pattern). Label each variant clearly above its frame. The `lo-fi-index.json` records both frame IDs per screen — `frame_element_id` (primary) and `alternate_frame_element_id`. |
+
+Default to `balanced` if `creativity_mode` is absent or unrecognised.
+
+
 
 After writing `lo-fi.excalidraw` (or `lo-fi.svg`), if `output.lo_fi_gate: true` in `pipeline.config.json`:
 

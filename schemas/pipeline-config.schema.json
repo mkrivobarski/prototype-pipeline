@@ -73,6 +73,26 @@
           "description": "Path to design token file, relative to working_dir. Supported: CSS custom properties, JSON token file."
         }
       }
+    },
+    "creativity_mode": {
+      "type": "string",
+      "enum": ["structured", "balanced", "exploratory"],
+      "default": "balanced",
+      "description": "Controls how much creative latitude generative agents apply. 'structured' = schema-strict, single output; 'balanced' = schema-compliant with creative judgment on ambiguous decisions; 'exploratory' = generate divergent variations and prioritise novelty."
+    },
+    "stage_overrides": {
+      "type": "object",
+      "description": "Per-stage creativity overrides. Key is agent name (e.g. 'lo-fi-wireframe-builder'), value is one of 'structured' | 'balanced' | 'exploratory'. Overrides the top-level creativity_mode for that stage.",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["structured", "balanced", "exploratory"]
+      },
+      "examples": [
+        {
+          "lo-fi-wireframe-builder": "exploratory",
+          "requirements-analyst": "structured"
+        }
+      ]
     }
   }
 }

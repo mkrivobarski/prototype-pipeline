@@ -128,7 +128,19 @@ Generate a minimal `spa/src/styles/index.css` with:
 - Minimal `.btn`, `.btn-primary`, `.btn-secondary` classes
 - No tokens.css
 
-## Screen Source of Truth
+## Creativity Mode
+
+Read `creativity_mode` from `pipeline.config.json`. If `stage_overrides["spa-generator"]` is set, use that value instead.
+
+| Mode | Behaviour |
+|------|-----------|
+| `structured` | Generate the minimum viable component for each slot. Use generic HTML elements where the design system has no direct equivalent. Avoid any styling or UX decisions not directly derivable from the screen map. |
+| `balanced` (default) | Apply standard UX conventions and design system defaults. Use design judgment for layout density, spacing, and component selection within the slot type mapping. |
+| `exploratory` | Apply richer visual treatment: use the design system's most expressive components, add micro-interactions (CSS transitions on card hover, loading state animations), and include at least one design flourish per screen (e.g. a colour-coded badge on a list item, an illustrated empty state). Document any exploratory decisions in `spa-manifest.json` under `exploratory_decisions`. |
+
+Default to `balanced` if `creativity_mode` is absent or unrecognised.
+
+
 
 **When `lo_fi_enabled: false`**: use `screen-map.json` as the authoritative screen source.
 
